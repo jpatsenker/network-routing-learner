@@ -60,7 +60,7 @@ def learnShps(full, sizes):
 	st=time.time()
 	weights={}
 	for s in sizes:
-		weights[s] = learnInst(doRandomWalk(full,s))
+		weights[s] = learnInst(random_walk(full,s))
 		print "FINISHED SIZE", s, "time: ", time.time()-st
 	return weights
 
@@ -68,7 +68,7 @@ def learnExp(full, sizes):
 	st=time.time()
 	weights={}
 	for s in range(len(sizes)):
-		weights[s] = learnInstExp(doRandomWalk(full,sizes[s]))
+		weights[s] = learnInstExp(random_walk(full,sizes[s]))
 		print "FINISHED SIZE", s, "time: ", time.time()-st
 	return weights
 
@@ -117,7 +117,7 @@ def runAllExp(full, sizes):
 	st=time.time()
 	exps={}
 	for s in sizes:
-		exps[s] = runDefExp(doRandomWalk(full,s))
+		exps[s] = runDefExp(random_walk(full,s))
 		print "FINISHED SIZE", s, "time: ", time.time()-st
 	return exps
 
@@ -159,7 +159,7 @@ def runAllExpComp(full, sizes,weights):
 	exps={}
 	shps = {}
 	for s in sizes:
-		exps[s],shps[s] = runDefExpComp(doRandomWalk(full,s),weights)
+		exps[s],shps[s] = runDefExpComp(random_walk(full,s),weights)
 		print "FINISHED SIZE", s, "time: ", time.time()-st
 	return exps,shps
 
@@ -322,23 +322,23 @@ def shortestPathsNDest(nodes,use=[0]):
 def selectRandomUser(users):
 	return users.keys()[int(random.random()*len(users.keys()))]
 
-def doRandomWalk(users, size):
-	availableMovements = set()
-	randomSet = set()
+def random_walk(users, size):
+	available = set()
+	rset = set()
 	u1 = selectRandomUser(users)
-	randomSet.add(u1)
-	availableMovements = availableMovements.union(set(users[u1].friends))
+	rset.add(u1)
+	available = available.union(set(users[u1].friends))
 	for i in range(size-1):
 		if i%1000==0:
 			print i
-		uNext = random.sample(availableMovements, 1)[0]
-		randomSet.add(uNext)
-		availableMovements = availableMovements.union(set(users[uNext].friends))
-		availableMovements.remove(uNext)
-		availableMovements = availableMovements.difference(set(randomSet))
+		uNext = random.sample(available, 1)[0]
+		rset.add(uNext)
+		available = available.union(set(users[uNext].friends))
+		available.remove(uNext)
+		available = available.difference(set(rset))
 	popSet = {}
-	for r in randomSet:
-			friendsOfR = set(users[r].friends).intersection(randomSet)
+	for r in rset:
+			friendsOfR = set(users[r].friends).intersection(rset)
 			commOfR = users[r].comm
 			posOfR = users[r].pos
 			popSet[r] = User(r,commOfR,posOfR,friendsOfR)
