@@ -7,7 +7,6 @@ import copy
 import math
 import time
 
-
 '''
 import toolkit.tools as t
 from core.user import User
@@ -28,269 +27,273 @@ str_deg = exps['degree']/(shps+1.)
 str_w = exps['weighted']/(shps+1.)
 '''
 
+
 def tt(n):
-	k=0
-	z=0
+	k = 0
+	z = 0
 	ts = time.time()
 	for i in range(n):
-		z=k+i
-	return time.time()-ts
+		z = k + i
+	return time.time() - ts
+
 
 def tsq(n):
-	k=0
-	z=0
+	k = 0
+	z = 0
 	ts = time.time()
 	for i in range(n):
 		for j in range(n):
-			z=k+i+j
-	return time.time()-ts
+			z = k + i + j
+	return time.time() - ts
+
 
 def map_tt(n):
-	k=0
+	k = 0
 	ts = time.time()
-	map(lambda i: k+i, range(n))
-	return time.time()-ts
+	map(lambda i: k + i, range(n))
+	return time.time() - ts
 
-def gradientDescentStep(weights, graph):
-	pmap = makePmap(graph,r_alg=lambda x,y,z: pmap_weights(weights))
-	exp = getExpectations(graph, pmap=pmap)
-	np.mean(exp)
 
-def learnShps(full, sizes):
-	st=time.time()
-	weights={}
+def learn_shps(full, sizes):
+	st = time.time()
+	weights = {}
 	for s in sizes:
-		weights[s] = learnInst(random_walk(full,s))
-		print "FINISHED SIZE", s, "time: ", time.time()-st
+		weights[s] = learn_inst(random_walk(full, s))
+		print "FINISHED SIZE", s, "time: ", time.time() - st
 	return weights
 
-def learnExp(full, sizes):
-	st=time.time()
-	weights={}
+
+def learn_exp(full, sizes):
+	st = time.time()
+	weights = {}
 	for s in range(len(sizes)):
-		weights[s] = learnInstExp(random_walk(full,sizes[s]))
-		print "FINISHED SIZE", s, "time: ", time.time()-st
+		weights[s] = learn_inst_exp(random_walk(full, sizes[s]))
+		print "FINISHED SIZE", s, "time: ", time.time() - st
 	return weights
 
-def learnInst(nodes):
-	inodes=reindexDict(nodes)
-	shps = shortestPaths(inodes)
+
+def learn_inst(nodes):
+	inodes = reindex_dict(nodes)
+	shps = shortest_paths(inodes)
 	inst = extractInstancesFull(inodes)
 	obj = []
 	for inst_x in inst:
-		og=shps[inst_x['source'].uid,inst_x['destination'].uid]
-		nu=shps[inst_x['step'].uid,inst_x['destination'].uid]
-		if og==nu+1:
+		og = shps[inst_x['source'].uid, inst_x['destination'].uid]
+		nu = shps[inst_x['step'].uid, inst_x['destination'].uid]
+		if og == nu + 1:
 			obj.append(1)
 		else:
 			obj.append(0)
 	fm = extractFeaturesMatrix(inst)
 	fms = standardize(fm)
-	return logistic_regression(fms,obj)
+	return logistic_regression(fms, obj)
 
-def learnInstExp(nodes):
-	inodes=reindexDict(nodes)
-	shps = shortestPaths(inodes)
+
+def learn_inst_exp(nodes):
+	inodes = reindex_dict(nodes)
+	shps = shortest_paths(inodes)
 	inst = extractInstancesFull(inodes)
-	exp = getExpectations(inodes,shps)
+	exp = getExpectations(inodes, shps)
 	obj = []
 	for inst_x in inst:
-		og = exp[inst_x['source'].uid,inst_x['destination'].uid]
-		nu = exp[inst_x['step'].uid,inst_x['destination'].uid]
-		if og-nu > 0.25:
+		og = exp[inst_x['source'].uid, inst_x['destination'].uid]
+		nu = exp[inst_x['step'].uid, inst_x['destination'].uid]
+		if og - nu > 0.25:
 			obj.append(1)
 		else:
 			obj.append(0)
 	fm = extractFeaturesMatrix(inst)
 	fms = standardize(fm)
-	return logistic_regression(fms,obj)
+	return logistic_regression(fms, obj)
 
 
-def testWeights(nodes,weights):
-	inodes=reindexDict(nodes)
-	shps = shortestPaths(inodes)
-	pmap = makePmap(inodes,lambda x,y,z: pmap_weights(x,y,z,weights))
-	exps = getExpectations(inodes,shps,pmap)
-	return exps,shps
+def test_weights(nodes, weights):
+	inodes = reindex_dict(nodes)
+	shps = shortest_paths(inodes)
+	pmap = make_pmap(inodes, lambda x, y, z: pmap_weights(x, y, z, weights))
+	exps = getExpectations(inodes, shps, pmap)
+	return exps, shps
 
-def runAllExp(full, sizes):
-	st=time.time()
-	exps={}
+
+def run_all_exp(full, sizes):
+	st = time.time()
+	exps = {}
 	for s in sizes:
-		exps[s] = runDefExp(random_walk(full,s))
-		print "FINISHED SIZE", s, "time: ", time.time()-st
+		exps[s] = run_def_exp(random_walk(full, s))
+		print "FINISHED SIZE", s, "time: ", time.time() - st
 	return exps
 
 
-def runDefExp(nodes):
-	#log time
-	st=time.time()
+def run_def_exp(nodes):
+	# log time
+	st = time.time()
 
-	#GET FULL REINDEX
-	ins = reindexDict(nodes)
+	# GET FULL REINDEX
+	ins = reindex_dict(nodes)
 
-	shps = shortestPaths(ins)
-	print "FINISHED SHORTEST PATHS, time: ", time.time()-st
+	shps = shortest_paths(ins)
+	print "FINISHED SHORTEST PATHS, time: ", time.time() - st
 
-	up = makePmap(ins,uniform)
-	print "FINISHED UNIFORM PMAP, time: ", time.time()-st
+	up = make_pmap(ins, uniform)
+	print "FINISHED UNIFORM PMAP, time: ", time.time() - st
 
-	lp = makePmap(ins,closer)
-	print "FINISHED LOCATION PMAP, time: ", time.time()-st
+	lp = make_pmap(ins, closer)
+	print "FINISHED LOCATION PMAP, time: ", time.time() - st
 
-	wlp = makePmap(ins,weighted_closer)
-	print "FINISHED WEIGHTED LOCATION PMAP, time: ", time.time()-st
+	wlp = make_pmap(ins, weighted_closer)
+	print "FINISHED WEIGHTED LOCATION PMAP, time: ", time.time() - st
 
-	exp_u = getExpectations(ins,shps,up)
-	print "FINISHED UNIFORM EXPECTATION, time: ", time.time()-st
+	exp_u = getExpectations(ins, shps, up)
+	print "FINISHED UNIFORM EXPECTATION, time: ", time.time() - st
 
-	exp_lp = getExpectations(ins,shps,lp)
-	print "FINISHED LOCATION EXPECTATION, time: ", time.time()-st
+	exp_lp = getExpectations(ins, shps, lp)
+	print "FINISHED LOCATION EXPECTATION, time: ", time.time() - st
 
-	exp_wlp = getExpectations(ins,shps,wlp)
-	print "FINISHED WEIGHTED LOCATION EXPECTATION, time: ", time.time()-st
+	exp_wlp = getExpectations(ins, shps, wlp)
+	print "FINISHED WEIGHTED LOCATION EXPECTATION, time: ", time.time() - st
 
 	return {'uniform': exp_u, 'location': exp_lp, 'weighted_location': exp_wlp}, shps
 
 
-
-def runAllExpComp(full, sizes,weights):
-	st=time.time()
-	exps={}
+def run_all_exp_comp(full, sizes, weights):
+	st = time.time()
+	exps = {}
 	shps = {}
 	for s in sizes:
-		exps[s],shps[s] = runDefExpComp(random_walk(full,s),weights)
-		print "FINISHED SIZE", s, "time: ", time.time()-st
-	return exps,shps
+		exps[s], shps[s] = runDefExpComp(random_walk(full, s), weights)
+		print "FINISHED SIZE", s, "time: ", time.time() - st
+	return exps, shps
 
-def runAllExpCompWs(nodes,weights):
-	st=time.time()
-	exps={}
+
+def run_all_exp_comp_ws(nodes, weights):
+	st = time.time()
+	exps = {}
 	shps = {}
 	for w in range(len(weights)):
-		exps[w],shps[w] = runDefExpComp(nodes,weights[w])
-		print "FINISHED WEIGHT", w, "time: ", time.time()-st
-	return exps,shps
+		exps[w], shps[w] = runDefExpComp(nodes, weights[w])
+		print "FINISHED WEIGHT", w, "time: ", time.time() - st
+	return exps, shps
 
-def runDefExpComp(nodes,weights):
-	#log time
-	st=time.time()
 
-	#GET FULL REINDEX
-	ins = reindexDict(nodes)
+def runDefExpComp(nodes, weights):
+	# log time
+	st = time.time()
 
-	shps = shortestPaths(ins)
-	print "FINISHED SHORTEST PATHS, time: ", time.time()-st
+	# GET FULL REINDEX
+	ins = reindex_dict(nodes)
 
-	up = makePmap(ins,uniform)
-	print "FINISHED UNIFORM PMAP, time: ", time.time()-st
+	shps = shortest_paths(ins)
+	print "FINISHED SHORTEST PATHS, time: ", time.time() - st
 
-	lp = makePmap(ins,closer)
-	print "FINISHED LOCATION PMAP, time: ", time.time()-st
+	up = make_pmap(ins, uniform)
+	print "FINISHED UNIFORM PMAP, time: ", time.time() - st
 
-	wlp = makePmap(ins,weighted_closer)
-	print "FINISHED WEIGHTED LOCATION PMAP, time: ", time.time()-st
+	lp = make_pmap(ins, closer)
+	print "FINISHED LOCATION PMAP, time: ", time.time() - st
 
-	ccp = makePmap(ins,communities)
-	print "FINISHED COMMON COMMUNITIES PMAP, time: ", time.time()-st
+	wlp = make_pmap(ins, weighted_closer)
+	print "FINISHED WEIGHTED LOCATION PMAP, time: ", time.time() - st
 
-	pp = makePmap(ins,popular)
-	print "FINISHED DEGREE PMAP, time: ", time.time()-st
+	ccp = make_pmap(ins, communities)
+	print "FINISHED COMMON COMMUNITIES PMAP, time: ", time.time() - st
 
-	wp = makePmap(ins,lambda x,y,z: pmap_weights(x,y,z,weights=weights))
-	print "FINISHED WEIGHTED PMAP, time: ", time.time()-st
+	pp = make_pmap(ins, popular)
+	print "FINISHED DEGREE PMAP, time: ", time.time() - st
 
-	exp_u = getExpectations(ins,shps,up)
-	print "FINISHED UNIFORM EXPECTATION, time: ", time.time()-st
+	wp = make_pmap(ins, lambda x, y, z: pmap_weights(x, y, z, weights=weights))
+	print "FINISHED WEIGHTED PMAP, time: ", time.time() - st
 
-	exp_lp = getExpectations(ins,shps,lp)
-	print "FINISHED LOCATION EXPECTATION, time: ", time.time()-st
+	exp_u = getExpectations(ins, shps, up)
+	print "FINISHED UNIFORM EXPECTATION, time: ", time.time() - st
 
-	exp_wlp = getExpectations(ins,shps,wlp)
-	print "FINISHED WEIGHTED LOCATION EXPECTATION, time: ", time.time()-st
+	exp_lp = getExpectations(ins, shps, lp)
+	print "FINISHED LOCATION EXPECTATION, time: ", time.time() - st
 
-	exp_ccp = getExpectations(ins,shps,ccp)
-	print "FINISHED COMMON COMMUNITIES EXPECTATION, time: ", time.time()-st
+	exp_wlp = getExpectations(ins, shps, wlp)
+	print "FINISHED WEIGHTED LOCATION EXPECTATION, time: ", time.time() - st
 
-	exp_pp = getExpectations(ins,shps,pp)
-	print "FINISHED DEGREE EXPECTATION, time: ", time.time()-st
+	exp_ccp = getExpectations(ins, shps, ccp)
+	print "FINISHED COMMON COMMUNITIES EXPECTATION, time: ", time.time() - st
 
-	exp_wp = getExpectations(ins,shps,wp)
-	print "FINISHED WEIGHTED EXPECTATION, time: ", time.time()-st
+	exp_pp = getExpectations(ins, shps, pp)
+	print "FINISHED DEGREE EXPECTATION, time: ", time.time() - st
 
-	return {'uniform': exp_u, 'location': exp_lp, 'weighted_location': exp_wlp, 'common_communities': exp_ccp, 'degree': exp_pp, 'weighted':exp_wp}, shps
+	exp_wp = getExpectations(ins, shps, wp)
+	print "FINISHED WEIGHTED EXPECTATION, time: ", time.time() - st
+
+	return {'uniform': exp_u, 'location': exp_lp, 'weighted_location': exp_wlp, 'common_communities': exp_ccp,
+	        'degree': exp_pp, 'weighted': exp_wp}, shps
 
 
 def loadDict():
-	nodes = pickle.load(open("GraphSets/nodes_data_dictionary.pkl",'r'))
+	nodes = pickle.load(open("GraphSets/nodes_data_dictionary.pkl", 'r'))
 	return nodes
 
-def loadSmallDict():
-	nodes = pickle.load(open("GraphSets/full_random/NODES1000.pkl", 'r'))
-	return nodes
 
-def reindexDict(nodes):
+
+def reindex_dict(nodes):
 	inodes = dict()
-	ndic = dict(zip(range(len(nodes.keys())),nodes.keys()))
-	rev= {v: k for k, v in ndic.iteritems()}
+	ndic = dict(zip(range(len(nodes.keys())), nodes.keys()))
+	rev = {v: k for k, v in ndic.iteritems()}
 	for n in range(len(nodes)):
 		inodes[n] = copy.copy(nodes[ndic[n]])
-		inodes[n].uid=n
-		if n%1000==0:
+		inodes[n].uid = n
+		if n % 1000 == 0:
 			print "Done: ", n
 	for n in inodes:
 		inodes[n].friends = map(lambda f: rev[f], inodes[n].friends)
-		if n%1000==0:
+		if n % 1000 == 0:
 			print "Done: ", n
 	return inodes
 
-def makeAdjacencyList(f):
-	a = np.zeros([len(f),len(f)])
+
+def make_adjacency_list(f):
+	a = np.zeros([len(f), len(f)])
 	for i in range(len(f)):
 		for n in f[i].friends:
-			a[i,n]=1
-		if i%100==0:
+			a[i, n] = 1
+		if i % 100 == 0:
 			print "Done " + str(i)
 	return a
 
-def shortestPath(nodes,d):
-	shps = np.zeros([len(nodes)])-1
+
+def shortest_path(nodes, d):
+	shps = np.array(np.zeros([len(nodes)]) - 1)
 	queue = [d]
 	vstd = np.zeros([len(nodes)])
 	vstd[d] = 1
 	count = 0
 	l = d
-	while len(queue)>0:
-		#print queue
+	while len(queue) > 0:
 		c = queue.pop(0)
 		fr = nodes[c].friends
-		#print fr
 		for f in fr:
-			if vstd[f]!=1:
+			if vstd[f] != 1:
 				queue.append(f)
-				vstd[f]=1
-		shps[c]=count
-		#print c, ": ", count
-		if l == c and len(queue)>0:
+				vstd[f] = 1
+		shps[c] = count
+		if l == c and len(queue) > 0:
 			l = queue[-1]
-			count+=1
-		#if count==3:
-		#		break
+			count += 1
 	return shps
 
-def shortestPaths(nodes):
-	shps = np.zeros([len(nodes),len(nodes)])-1
+
+def shortest_paths(nodes):
+	shps = np.zeros([len(nodes), len(nodes)]) - 1
 	for d in nodes:
-		shps[d] = shortestPath(nodes,d)
-		if d%100==0:
+		shps[d] = shortest_path(nodes, d)
+		if d % 100 == 0:
 			print "Done " + str(d)
 	return shps
 
-def shortestPathsNDest(nodes,use=[0]):
-	shps = np.zeros([len(n),len(nodes)])-1
+
+def shortest_paths_n_dest(nodes, use=None):
+	if not use:
+		use = [0]
+	shps = np.zeros([len(nodes), len(nodes)]) - 1
 	for d in range(len(use)):
-		shps[d] = shortestPath(nodes,use[d])
-		if d%100==0:
+		shps[d] = shortest_path(nodes, use[d])
+		if d % 100 == 0:
 			print "Done " + str(d)
 	return shps
 
@@ -320,7 +323,8 @@ def shortestPathsNDest(nodes,use=[0]):
 
 
 def selectRandomUser(users):
-	return users.keys()[int(random.random()*len(users.keys()))]
+	return users.keys()[int(random.random() * len(users.keys()))]
+
 
 def random_walk(users, size):
 	available = set()
@@ -328,8 +332,8 @@ def random_walk(users, size):
 	u1 = selectRandomUser(users)
 	rset.add(u1)
 	available = available.union(set(users[u1].friends))
-	for i in range(size-1):
-		if i%1000==0:
+	for i in range(size - 1):
+		if i % 1000 == 0:
 			print i
 		uNext = random.sample(available, 1)[0]
 		rset.add(uNext)
@@ -338,25 +342,28 @@ def random_walk(users, size):
 		available = available.difference(set(rset))
 	popSet = {}
 	for r in rset:
-			friendsOfR = set(users[r].friends).intersection(rset)
-			commOfR = users[r].comm
-			posOfR = users[r].pos
-			popSet[r] = User(r,commOfR,posOfR,friendsOfR)
+		friendsOfR = set(users[r].friends).intersection(rset)
+		commOfR = users[r].comm
+		posOfR = users[r].pos
+		popSet[r] = User(r, commOfR, posOfR, friendsOfR)
 	return popSet
 
+
 def distance(p0, p1):
-	return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
+	return math.sqrt((p0[0] - p1[0]) ** 2 + (p0[1] - p1[1]) ** 2)
 
 
 def uniform(frnds, nodes, dest):
-	return [1/float(len(frnds))]*len(frnds)
+	return [1 / float(len(frnds))] * len(frnds)
+
 
 def closer(frnds, nodes, dest):
-	dists = map(lambda n: distance(nodes[n].pos,nodes[dest].pos), frnds)
-	ps = map(lambda d: 1/(d+1), dists)
+	dists = map(lambda n: distance(nodes[n].pos, nodes[dest].pos), frnds)
+	ps = map(lambda d: 1 / (d + 1), dists)
 	ps = np.array(ps)
 	ps /= ps.sum()
 	return ps
+
 
 def popular(frnds, nodes, dest):
 	popularity = map(lambda n: float(nodes[n].deg1), frnds)
@@ -364,73 +371,82 @@ def popular(frnds, nodes, dest):
 	popularity /= popularity.sum()
 	return popularity
 
+
 def communities(frnds, nodes, dest):
-	ccs = map(lambda step: len(set.intersection(set(nodes[step].comm),set(nodes[dest].comm))), frnds)
+	ccs = map(lambda step: len(set.intersection(set(nodes[step].comm), set(nodes[dest].comm))), frnds)
 	ccs = np.array(ccs)
 	ccs /= ccs.sum()
 	return ccs
 
+
 def pmap_weights(frnds, nodes, dest, weights=None):
 	ps = []
 	for f in frnds:
-		feat = extractFeature({'source':None,'destination':nodes[dest],'step':nodes[f]})
-		ps.append(np.dot(feat,np.array(weights)))
+		feat = extractFeature({'source': None, 'destination': nodes[dest], 'step': nodes[f]})
+		ps.append(np.dot(feat, np.array(weights)))
 	ps = np.array(ps)
 	ps /= ps.sum()
 	return ps
 
-def sig1(dist, a=0.001, t= 275):
-	return np.apply_along_axis(lambda d: a*(d - t),0,dist)
 
-def weighted_closer(frnds, nodes, dest, wfunc = sig1):
-	dists = map(lambda n: distance(nodes[n].pos,nodes[dest].pos), frnds)
+def sig1(dist, a=0.001, t=275):
+	return np.apply_along_axis(lambda d: a * (d - t), 0, dist)
+
+
+def weighted_closer(frnds, nodes, dest, wfunc=sig1):
+	dists = map(lambda n: distance(nodes[n].pos, nodes[dest].pos), frnds)
 	dists = wfunc(dists)
-	ps = map(lambda d: 1/(d+1), dists)
+	ps = map(lambda d: 1 / (d + 1), dists)
 	ps = np.array(ps)
 	ps /= ps.sum()
 	return ps
 
 
 def mean_vec(nar):
-	return np.ones(nar.shape[0]).dot(nar)/nar.shape[0]
+	return np.ones(nar.shape[0]).dot(nar) / nar.shape[0]
+
 
 def center(nar):
-	return nar - np.dot(np.ones(nar.shape[0]).reshape(nar.shape[0],1), mean_vec(nar).reshape(nar.shape[1],1).T)
+	return nar - np.dot(np.ones(nar.shape[0]).reshape(nar.shape[0], 1), mean_vec(nar).reshape(nar.shape[1], 1).T)
+
 
 def standardize(nar):
 	cnar = center(nar)
 	std_vec = np.std(nar, axis=0)
-	return cnar/std_vec
+	return cnar / std_vec
 
-def makePmap(nodes,r_alg=uniform):
-	pmap = np.zeros([len(nodes),len(nodes),len(nodes)])
+
+def make_pmap(nodes, r_alg=uniform):
+	pmap = np.zeros([len(nodes), len(nodes), len(nodes)])
 	for d in nodes:
 		for n in nodes:
 			fr = nodes[n].friends
 			ps = r_alg(fr, nodes, d)
 			for f in range(len(fr)):
 				pmap[d, n, fr[f]] = ps[f]
-		if d%100==0:
+		if d % 100 == 0:
 			print "Done: ", d
 	return pmap
 
-def makePmapNDest(nodes,use=[0],r_alg=uniform):
-	pmap = np.zeros([len(use),len(nodes),len(nodes)])
+
+def makePmapNDest(nodes, use=[0], r_alg=uniform):
+	pmap = np.zeros([len(use), len(nodes), len(nodes)])
 	for d in range(len(use)):
 		for n in nodes:
 			fr = nodes[n].friends
 			ps = r_alg(fr, nodes, use[d])
 			for f in range(len(fr)):
 				pmap[d, n, fr[f]] = ps[f]
-		if d%100==0:
+		if d % 100 == 0:
 			print "Done: ", d
 	return pmap
 
+
 def getExpectationsNDest(nodes, use=[0], shps=None, pmap=None, iters=10):
 	if shps is None:
-		shps = shortestPathsNDest(nodes,use=use)
+		shps = shortest_paths_n_dest(nodes, use=use)
 	if pmap is None:
-		pmap = makePmapNDest(nodes,use=use)
+		pmap = makePmapNDest(nodes, use=use)
 	expect = np.copy(shps)
 	nexp = np.zeros(expect.shape)
 	for i in range(iters):
@@ -438,15 +454,16 @@ def getExpectationsNDest(nodes, use=[0], shps=None, pmap=None, iters=10):
 		for d in range(len(use)):
 			for n in range(len(nodes)):
 				fr = nodes[n].friends
-				nexp[d,n] = sum(map(lambda x: expect[d,x]*pmap[d,n,x], fr))+1
-				# if shps[d,n] > expect[d,n]:
-				# 	print shps[d,n], expect[d,n], d, n
-				# 	return
-		expect=np.copy(nexp)
+				nexp[d, n] = sum(map(lambda x: expect[d, x] * pmap[d, n, x], fr)) + 1
+			# if shps[d,n] > expect[d,n]:
+			# 	print shps[d,n], expect[d,n], d, n
+			# 	return
+		expect = np.copy(nexp)
 		nexp = np.zeros(expect.shape)
 	return expect
 
-def getExpectations(nodes,shps=None,pmap=None,iters=10):
+
+def getExpectations(nodes, shps=None, pmap=None, iters=10):
 	"""
 	Creates Expectation Numpy Array: [destination, start]
 	:param nodes: Full Node array
@@ -457,9 +474,9 @@ def getExpectations(nodes,shps=None,pmap=None,iters=10):
 	:return:
 	"""
 	if shps is None:
-		shps = shortestPaths(nodes)
+		shps = shortest_paths(nodes)
 	if pmap is None:
-		pmap = makePmap(nodes)
+		pmap = make_pmap(nodes)
 	expect = np.copy(shps)
 	nexp = np.zeros(expect.shape)
 	for i in range(iters):
@@ -467,11 +484,11 @@ def getExpectations(nodes,shps=None,pmap=None,iters=10):
 		for d in nodes:
 			for n in range(len(nodes)):
 				fr = nodes[n].friends
-				nexp[d,n] = sum(map(lambda x: expect[d,x]*pmap[d,n,x], fr))+1
-				# if shps[d,n] > expect[d,n]:
-				# 	print shps[d,n], expect[d,n], d, n
-				# 	return
-		expect=np.copy(nexp)
+				nexp[d, n] = sum(map(lambda x: expect[d, x] * pmap[d, n, x], fr)) + 1
+			# if shps[d,n] > expect[d,n]:
+			# 	print shps[d,n], expect[d,n], d, n
+			# 	return
+		expect = np.copy(nexp)
 		nexp = np.zeros(expect.shape)
 	return expect
 
@@ -479,44 +496,47 @@ def getExpectations(nodes,shps=None,pmap=None,iters=10):
 def extractInstancesFull(nodes):
 	instances = []
 	for i in range(len(nodes)):
-		sour = int(random.random()*len(nodes))
+		sour = int(random.random() * len(nodes))
 		s = nodes[sour]
-		dest = int(random.random()*len(nodes))
+		dest = int(random.random() * len(nodes))
 		d = nodes[dest]
 		for f in s.friends:
 			instances.append({"source": s, "destination": d, "step": nodes[f]})
 	return instances
 
-def extractInstancesRandom(nodes,num):
+
+def extractInstancesRandom(nodes, num):
 	instances = []
 	for i in range(num):
-		sour = int(random.random()*len(nodes))
+		sour = int(random.random() * len(nodes))
 		s = nodes[sour]
-		dest = int(random.random()*len(nodes))
+		dest = int(random.random() * len(nodes))
 		d = nodes[dest]
-		step = int(random.random()*len(s.friends))
+		step = int(random.random() * len(s.friends))
 		f = nodes[s.friends[step]]
 		instances.append({"source": s, "destination": d, "step": f})
 	return instances
 
+
 def extractFeature(instance):
 	destination = instance["destination"]
 	step = instance["step"]
-	dist = 1./(distance(step.pos, destination.pos) + 1)
+	dist = 1. / (distance(step.pos, destination.pos) + 1)
 
-	communities_in_common = len(set.intersection(set(step.comm),set(destination.comm)))
+	communities_in_common = len(set.intersection(set(step.comm), set(destination.comm)))
 
 	degree = step.deg1
 
 	a = .001
 	t = 275
-	dist_weighted = 1./(math.tanh(a*(dist - t)) + 1)
+	dist_weighted = 1. / (math.tanh(a * (dist - t)) + 1)
 	log_degree = math.log(degree)
 
-	#DISTANCE should be 1/(dist+epsilon)
-	#Weighted Dist should be 1/(wd+epsilon)
+	# DISTANCE should be 1/(dist+epsilon)
+	# Weighted Dist should be 1/(wd+epsilon)
 
 	return np.array([dist, degree, communities_in_common, dist_weighted, log_degree])
+
 
 def extractFeaturesMatrix(instances):
 	feature_transform = []
@@ -524,19 +544,19 @@ def extractFeaturesMatrix(instances):
 		source = i["source"]
 		destination = i["destination"]
 		step = i["step"]
-		dist = 1./(distance(step.pos, destination.pos) + 1)
+		dist = 1. / (distance(step.pos, destination.pos) + 1)
 
-		communities_in_common = len(set.intersection(set(step.comm),set(destination.comm)))
+		communities_in_common = len(set.intersection(set(step.comm), set(destination.comm)))
 
 		degree = step.deg1
 
 		a = .001
 		t = 275
-		dist_weighted = 1./(math.tanh(a*(dist - t)) + 1)
+		dist_weighted = 1. / (math.tanh(a * (dist - t)) + 1)
 		log_degree = math.log(degree)
 
-		#DISTANCE should be 1/(dist+epsilon)
-		#Weighted Dist should be 1/(wd+epsilon)
+		# DISTANCE should be 1/(dist+epsilon)
+		# Weighted Dist should be 1/(wd+epsilon)
 
 		feature_transform.append([dist, degree, communities_in_common, dist_weighted, log_degree])
 	return np.array(feature_transform)
@@ -551,13 +571,12 @@ def extractFeaturesMatrix(instances):
 # 	return cf
 
 
-def logistic_regression(fms,ys):
+def logistic_regression(fms, ys):
 	l = LogisticRegression()
 	print fms
-	l.fit(fms,ys)
+	l.fit(fms, ys)
 	weights = l.coef_[0]
 	return weights
-
 
 
 """
@@ -602,6 +621,3 @@ Ks_2sampResult(statistic=0.14990400000000004, pvalue=0.0)
 0.00011261765378879981
 
 """
-
-
-
