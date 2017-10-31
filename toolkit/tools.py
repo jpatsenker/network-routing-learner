@@ -10,15 +10,15 @@ import time
 '''
 import toolkit.tools as t
 from core.user import User
-i=2000
+i=100
 j=5
-test=1000
-n = t.loadDict()
-ni = t.reindexDict(n)
-ws = t.learnExp(ni, [i]*j)
+test=100
+n = t.load_dict()
+ni = t.reindex_dict(n)
+ws = t.learn_exp(ni, [i]*j)
 ws[len(ws)] = sum(ws.values())/float(len(ws))
-nt = t.doRandomWalk(ni,test)
-exps,shps = t.runDefExpComp(nt, ws[len(ws)-1])
+nt = t.random_walk(ni,test)
+exps,shps = t.run_all_exp_comp(nt, ws[len(ws)-1])
 str_unif = exps['uniform']/(shps+1.)
 str_loc = exps['location']/(shps+1.)
 str_comm = exps['common_communities']/(shps+1.)
