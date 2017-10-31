@@ -75,7 +75,7 @@ def learn_exp(full, sizes):
 def learn_inst(nodes):
 	inodes = reindex_dict(nodes)
 	shps = shortest_paths(inodes)
-	inst = extractInstancesFull(inodes)
+	inst = extract_instances_full(inodes)
 	obj = []
 	for inst_x in inst:
 		og = shps[inst_x['source'].uid, inst_x['destination'].uid]
@@ -84,7 +84,7 @@ def learn_inst(nodes):
 			obj.append(1)
 		else:
 			obj.append(0)
-	fm = extractFeaturesMatrix(inst)
+	fm = extract_feature_matrix(inst)
 	fms = standardize(fm)
 	return logistic_regression(fms, obj)
 
@@ -92,8 +92,8 @@ def learn_inst(nodes):
 def learn_inst_exp(nodes):
 	inodes = reindex_dict(nodes)
 	shps = shortest_paths(inodes)
-	inst = extractInstancesFull(inodes)
-	exp = getExpectations(inodes, shps)
+	inst = extract_instances_full(inodes)
+	exp = get_expectations(inodes, shps)
 	obj = []
 	for inst_x in inst:
 		og = exp[inst_x['source'].uid, inst_x['destination'].uid]
@@ -102,7 +102,7 @@ def learn_inst_exp(nodes):
 			obj.append(1)
 		else:
 			obj.append(0)
-	fm = extractFeaturesMatrix(inst)
+	fm = extract_feature_matrix(inst)
 	fms = standardize(fm)
 	return logistic_regression(fms, obj)
 
@@ -111,7 +111,7 @@ def test_weights(nodes, weights):
 	inodes = reindex_dict(nodes)
 	shps = shortest_paths(inodes)
 	pmap = make_pmap(inodes, lambda x, y, z: pmap_weights(x, y, z, weights))
-	exps = getExpectations(inodes, shps, pmap)
+	exps = get_expectations(inodes, shps, pmap)
 	return exps, shps
 
 
@@ -143,13 +143,13 @@ def run_def_exp(nodes):
 	wlp = make_pmap(ins, weighted_closer)
 	print "FINISHED WEIGHTED LOCATION PMAP, time: ", time.time() - st
 
-	exp_u = getExpectations(ins, shps, up)
+	exp_u = get_expectations(ins, shps, up)
 	print "FINISHED UNIFORM EXPECTATION, time: ", time.time() - st
 
-	exp_lp = getExpectations(ins, shps, lp)
+	exp_lp = get_expectations(ins, shps, lp)
 	print "FINISHED LOCATION EXPECTATION, time: ", time.time() - st
 
-	exp_wlp = getExpectations(ins, shps, wlp)
+	exp_wlp = get_expectations(ins, shps, wlp)
 	print "FINISHED WEIGHTED LOCATION EXPECTATION, time: ", time.time() - st
 
 	return {'uniform': exp_u, 'location': exp_lp, 'weighted_location': exp_wlp}, shps
@@ -203,32 +203,30 @@ def runDefExpComp(nodes, weights):
 	wp = make_pmap(ins, lambda x, y, z: pmap_weights(x, y, z, weights=weights))
 	print "FINISHED WEIGHTED PMAP, time: ", time.time() - st
 
-	exp_u = getExpectations(ins, shps, up)
+	exp_u = get_expectations(ins, shps, up)
 	print "FINISHED UNIFORM EXPECTATION, time: ", time.time() - st
 
-	exp_lp = getExpectations(ins, shps, lp)
+	exp_lp = get_expectations(ins, shps, lp)
 	print "FINISHED LOCATION EXPECTATION, time: ", time.time() - st
 
-	exp_wlp = getExpectations(ins, shps, wlp)
+	exp_wlp = get_expectations(ins, shps, wlp)
 	print "FINISHED WEIGHTED LOCATION EXPECTATION, time: ", time.time() - st
 
-	exp_ccp = getExpectations(ins, shps, ccp)
+	exp_ccp = get_expectations(ins, shps, ccp)
 	print "FINISHED COMMON COMMUNITIES EXPECTATION, time: ", time.time() - st
 
-	exp_pp = getExpectations(ins, shps, pp)
+	exp_pp = get_expectations(ins, shps, pp)
 	print "FINISHED DEGREE EXPECTATION, time: ", time.time() - st
 
-	exp_wp = getExpectations(ins, shps, wp)
+	exp_wp = get_expectations(ins, shps, wp)
 	print "FINISHED WEIGHTED EXPECTATION, time: ", time.time() - st
 
-	return {'uniform': exp_u, 'location': exp_lp, 'weighted_location': exp_wlp, 'common_communities': exp_ccp,
-	        'degree': exp_pp, 'weighted': exp_wp}, shps
+	return {'uniform': exp_u, 'location': exp_lp, 'weighted_location': exp_wlp, 'common_communities': exp_ccp, 'degree': exp_pp, 'weighted': exp_wp}, shps
 
 
-def loadDict():
+def load_dict():
 	nodes = pickle.load(open("GraphSets/nodes_data_dictionary.pkl", 'r'))
 	return nodes
-
 
 
 def reindex_dict(nodes):
@@ -382,7 +380,7 @@ def communities(frnds, nodes, dest):
 def pmap_weights(frnds, nodes, dest, weights=None):
 	ps = []
 	for f in frnds:
-		feat = extractFeature({'source': None, 'destination': nodes[dest], 'step': nodes[f]})
+		feat = extract_feature({'source': None, 'destination': nodes[dest], 'step': nodes[f]})
 		ps.append(np.dot(feat, np.array(weights)))
 	ps = np.array(ps)
 	ps /= ps.sum()
@@ -429,7 +427,7 @@ def make_pmap(nodes, r_alg=uniform):
 	return pmap
 
 
-def makePmapNDest(nodes, use=[0], r_alg=uniform):
+def make_pmap_n_dest(nodes, use=[0], r_alg=uniform):
 	pmap = np.zeros([len(use), len(nodes), len(nodes)])
 	for d in range(len(use)):
 		for n in nodes:
@@ -442,11 +440,11 @@ def makePmapNDest(nodes, use=[0], r_alg=uniform):
 	return pmap
 
 
-def getExpectationsNDest(nodes, use=[0], shps=None, pmap=None, iters=10):
+def get_expectations_n_dest(nodes, use=[0], shps=None, pmap=None, iters=10):
 	if shps is None:
 		shps = shortest_paths_n_dest(nodes, use=use)
 	if pmap is None:
-		pmap = makePmapNDest(nodes, use=use)
+		pmap = make_pmap_n_dest(nodes, use=use)
 	expect = np.copy(shps)
 	nexp = np.zeros(expect.shape)
 	for i in range(iters):
@@ -463,7 +461,7 @@ def getExpectationsNDest(nodes, use=[0], shps=None, pmap=None, iters=10):
 	return expect
 
 
-def getExpectations(nodes, shps=None, pmap=None, iters=10):
+def get_expectations(nodes, shps=None, pmap=None, iters=10):
 	"""
 	Creates Expectation Numpy Array: [destination, start]
 	:param nodes: Full Node array
@@ -493,7 +491,7 @@ def getExpectations(nodes, shps=None, pmap=None, iters=10):
 	return expect
 
 
-def extractInstancesFull(nodes):
+def extract_instances_full(nodes):
 	instances = []
 	for i in range(len(nodes)):
 		sour = int(random.random() * len(nodes))
@@ -505,7 +503,7 @@ def extractInstancesFull(nodes):
 	return instances
 
 
-def extractInstancesRandom(nodes, num):
+def extract_instances_random(nodes, num):
 	instances = []
 	for i in range(num):
 		sour = int(random.random() * len(nodes))
@@ -518,7 +516,7 @@ def extractInstancesRandom(nodes, num):
 	return instances
 
 
-def extractFeature(instance):
+def extract_feature(instance):
 	destination = instance["destination"]
 	step = instance["step"]
 	dist = 1. / (distance(step.pos, destination.pos) + 1)
@@ -538,7 +536,7 @@ def extractFeature(instance):
 	return np.array([dist, degree, communities_in_common, dist_weighted, log_degree])
 
 
-def extractFeaturesMatrix(instances):
+def extract_feature_matrix(instances):
 	feature_transform = []
 	for i in instances:
 		source = i["source"]
@@ -561,14 +559,6 @@ def extractFeaturesMatrix(instances):
 		feature_transform.append([dist, degree, communities_in_common, dist_weighted, log_degree])
 	return np.array(feature_transform)
 
-
-# def standardize(features):
-# 	cf = center(features)
-#
-# 	for f in range(1,cf.shape[1]):
-# 		cf[:,f] = cf[:,f]/np.std(cf[:,f])
-#
-# 	return cf
 
 
 def logistic_regression(fms, ys):
