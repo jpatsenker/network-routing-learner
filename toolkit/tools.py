@@ -405,7 +405,9 @@ def mean_vec(nar):
 
 
 def center(nar):
-	return nar - np.dot(np.ones(nar.shape[0]).reshape(nar.shape[0], 1), mean_vec(nar).reshape(nar.shape[1], 1).T)
+	one_mat = np.ones(nar.shape[0]).reshape(nar.shape[0], 1)
+	mvec = mean_vec(nar).reshape(nar.shape[1], 1).T
+	return nar - np.dot(one_mat, mvec)
 
 
 def standardize(nar):
@@ -427,7 +429,9 @@ def make_pmap(nodes, r_alg=uniform):
 	return pmap
 
 
-def make_pmap_n_dest(nodes, use=[0], r_alg=uniform):
+def make_pmap_n_dest(nodes, use=None, r_alg=uniform):
+	if not use:
+		use = [0]
 	pmap = np.zeros([len(use), len(nodes), len(nodes)])
 	for d in range(len(use)):
 		for n in nodes:
