@@ -1,0 +1,12 @@
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+
+Data/*
+GraphSets/full_random/*
+GraphSets/plots/*
+GraphSets/pmaps_for_dests.zip
+GraphSets/nodes_data_dictionary.pkl
+
