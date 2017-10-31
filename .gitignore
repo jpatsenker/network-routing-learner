@@ -5,7 +5,7 @@ out
 gen
 
 #Mac
-.DSStore
+.DS_Store
 
 Data/*
 GraphSets/full_random/*
