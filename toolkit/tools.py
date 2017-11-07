@@ -11,14 +11,14 @@ import time
 import toolkit.tools as t
 from core.user import User
 i=100
-j=5
+j=1
 test=100
 n = t.load_dict()
 ni = t.reindex_dict(n)
 ws = t.learn_exp(ni, [i]*j)
 ws[len(ws)] = sum(ws.values())/float(len(ws))
 nt = t.random_walk(ni,test)
-exps,shps = t.run_all_exp_comp(nt, ws[len(ws)-1])
+exps,shps = t.run_def_exp_comp(nt, ws[len(ws)-1])
 str_unif = exps['uniform']/(shps+1.)
 str_loc = exps['location']/(shps+1.)
 str_comm = exps['common_communities']/(shps+1.)
@@ -160,7 +160,7 @@ def run_all_exp_comp(full, sizes, weights):
 	exps = {}
 	shps = {}
 	for s in sizes:
-		exps[s], shps[s] = runDefExpComp(random_walk(full, s), weights)
+		exps[s], shps[s] = run_def_exp_comp(random_walk(full, s), weights)
 		print "FINISHED SIZE", s, "time: ", time.time() - st
 	return exps, shps
 
@@ -170,12 +170,12 @@ def run_all_exp_comp_ws(nodes, weights):
 	exps = {}
 	shps = {}
 	for w in range(len(weights)):
-		exps[w], shps[w] = runDefExpComp(nodes, weights[w])
+		exps[w], shps[w] = run_def_exp_comp(nodes, weights[w])
 		print "FINISHED WEIGHT", w, "time: ", time.time() - st
 	return exps, shps
 
 
-def runDefExpComp(nodes, weights):
+def run_def_exp_comp(nodes, weights):
 	# log time
 	st = time.time()
 
@@ -236,12 +236,12 @@ def reindex_dict(nodes):
 	for n in range(len(nodes)):
 		inodes[n] = copy.copy(nodes[ndic[n]])
 		inodes[n].uid = n
-		if n % 1000 == 0:
-			print "Done: ", n
+	#   if n % 1000 == 0:
+	#       print "Done: ", n
 	for n in inodes:
 		inodes[n].friends = map(lambda f: rev[f], inodes[n].friends)
-		if n % 1000 == 0:
-			print "Done: ", n
+	#   if n % 1000 == 0:
+	#   	print "Done: ", n
 	return inodes
 
 
@@ -320,14 +320,14 @@ def shortest_paths_n_dest(nodes, use=None):
 # 	return shps
 
 
-def selectRandomUser(users):
+def select_random_user(users):
 	return users.keys()[int(random.random() * len(users.keys()))]
 
 
 def random_walk(users, size):
 	available = set()
 	rset = set()
-	u1 = selectRandomUser(users)
+	u1 = select_random_user(users)
 	rset.add(u1)
 	available = available.union(set(users[u1].friends))
 	for i in range(size - 1):
@@ -444,7 +444,9 @@ def make_pmap_n_dest(nodes, use=None, r_alg=uniform):
 	return pmap
 
 
-def get_expectations_n_dest(nodes, use=[0], shps=None, pmap=None, iters=10):
+def get_expectations_n_dest(nodes, use=None, shps=None, pmap=None, iters=10):
+	if not use:
+		use = [0]
 	if shps is None:
 		shps = shortest_paths_n_dest(nodes, use=use)
 	if pmap is None:
@@ -465,11 +467,10 @@ def get_expectations_n_dest(nodes, use=[0], shps=None, pmap=None, iters=10):
 	return expect
 
 
-def get_expectations(nodes, shps=None, pmap=None, iters=10):
+def get_expectations_iters(nodes, shps=None, pmap=None, iters=10):
 	"""
 	Creates Expectation Numpy Array: [destination, start]
 	:param nodes: Full Node array
-	:param nadj: Adjacency List speedup
 	:param shps: Shortest Paths speedup
 	:param pmap: Probability Map speedup
 	:param iters: Convergence Iterations
@@ -492,6 +493,38 @@ def get_expectations(nodes, shps=None, pmap=None, iters=10):
 			# 	return
 		expect = np.copy(nexp)
 		nexp = np.zeros(expect.shape)
+	return expect
+
+
+def get_expectations(nodes, shps=None, pmap=None, eps=100, max_iters=10000):
+	"""
+	Creates Expectation Numpy Array: [destination, start]
+	:param nodes: Full Node array
+	:param shps: Shortest Paths speedup
+	:param pmap: Probability Map speedup
+	:param eps: Convergence const
+	:param max_iters: maximum iterations
+	:return:
+	"""
+	if shps is None:
+		shps = shortest_paths(nodes)
+	if pmap is None:
+		pmap = make_pmap(nodes)
+	expect = np.copy(shps)
+	pexp = np.zeros(expect.shape)
+	i = 0
+	while np.mean((expect - pexp)**2) >= eps and i<max_iters:
+		print np.mean((expect - pexp)**2)
+		pexp = np.copy(expect)
+		print "Starting Iter ", i
+		for d in nodes:
+			for n in range(len(nodes)):
+				fr = nodes[n].friends
+				expect[d, n] = sum(map(lambda x: pexp[d, x] * pmap[d, n, x], fr)) + 1.
+				if shps[d,n] > expect[d,n]:
+					print shps[d,n], expect[d,n], d, n
+					return
+		i += 1
 	return expect
 
 
@@ -562,7 +595,6 @@ def extract_feature_matrix(instances):
 
 		feature_transform.append([dist, degree, communities_in_common, dist_weighted, log_degree])
 	return np.array(feature_transform)
-
 
 
 def logistic_regression(fms, ys):
