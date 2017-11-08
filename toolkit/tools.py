@@ -57,8 +57,8 @@ def map_tt(n):
 def learn_shps(full, sizes):
 	st = time.time()
 	weights = {}
-	for s in sizes:
-		weights[s] = learn_inst(random_walk(full, s))
+	for s in range(len(sizes)):
+		weights[s] = learn_inst(random_walk(full, sizes[s]))
 		print "FINISHED SIZE", s, "time: ", time.time() - st
 	return weights
 
@@ -350,10 +350,12 @@ def random_walk(users, size):
 def distance(p0, p1):
 	return math.sqrt((p0[0] - p1[0]) ** 2 + (p0[1] - p1[1]) ** 2)
 
+def distance_range(inst, dist_min=0, dist_max=1000000):
+	d = distance(inst["destination"].pos, inst["step"].pos)
+	return dist_min <= d <= dist_max
 
 def uniform(frnds, nodes, dest):
 	return [1 / float(len(frnds))] * len(frnds)
-
 
 def closer(frnds, nodes, dest):
 	dists = map(lambda n: distance(nodes[n].pos, nodes[dest].pos), frnds)
@@ -361,7 +363,6 @@ def closer(frnds, nodes, dest):
 	ps = np.array(ps)
 	ps /= ps.sum()
 	return ps
-
 
 def popular(frnds, nodes, dest):
 	popularity = map(lambda n: float(nodes[n].deg1), frnds)
@@ -570,7 +571,7 @@ def extract_instances_random_spec(nodes, num, spec):
 	return instances
 
 
-def extract_feature(instance):
+def extract_feature(instance, a=0.001, t=275):
 	destination = instance["destination"]
 	step = instance["step"]
 	dist = 1. / (distance(step.pos, destination.pos) + 1)
@@ -579,15 +580,13 @@ def extract_feature(instance):
 
 	degree = step.deg1
 
-	a = .001
-	t = 275
 	dist_weighted = 1. / (math.tanh(a * (dist - t)) + 1)
 	log_degree = math.log(degree)
 
 	return np.array([dist, degree, communities_in_common, dist_weighted, log_degree])
 
 
-def extract_feature_matrix(instances):
+def extract_feature_matrix(instances, a=0.001, t=275):
 	feature_transform = []
 	for i in instances:
 		source = i["source"]
@@ -599,13 +598,8 @@ def extract_feature_matrix(instances):
 
 		degree = step.deg1
 
-		a = .001
-		t = 275
-		dist_weighted = 1. / (math.tanh(a * (dist - t)) + 1)
+		dist_weighted = 1. / (math.tanh(a * (dist - t)) + 1.)
 		log_degree = math.log(degree)
-
-		# DISTANCE should be 1/(dist+epsilon)
-		# Weighted Dist should be 1/(wd+epsilon)
 
 		feature_transform.append([dist, degree, communities_in_common, dist_weighted, log_degree])
 	return np.array(feature_transform)
