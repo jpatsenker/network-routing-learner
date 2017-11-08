@@ -552,6 +552,23 @@ def extract_instances_random(nodes, num):
 		instances.append({"source": s, "destination": d, "step": f})
 	return instances
 
+def extract_instances_random_spec(nodes, num, spec):
+	instances = []
+	for i in range(num):
+		inst = None
+		while True:
+			sour = int(random.random() * len(nodes))
+			s = nodes[sour]
+			dest = int(random.random() * len(nodes))
+			d = nodes[dest]
+			step = int(random.random() * len(s.friends))
+			f = nodes[s.friends[step]]
+			inst = {"source": s, "destination": d, "step": f}
+			if spec(inst):
+				break
+		instances.append(inst)
+	return instances
+
 
 def extract_feature(instance):
 	destination = instance["destination"]
@@ -566,9 +583,6 @@ def extract_feature(instance):
 	t = 275
 	dist_weighted = 1. / (math.tanh(a * (dist - t)) + 1)
 	log_degree = math.log(degree)
-
-	# DISTANCE should be 1/(dist+epsilon)
-	# Weighted Dist should be 1/(wd+epsilon)
 
 	return np.array([dist, degree, communities_in_common, dist_weighted, log_degree])
 
