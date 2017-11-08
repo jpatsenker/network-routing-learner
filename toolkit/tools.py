@@ -28,6 +28,26 @@ str_w = exps['weighted']/(shps+1.)
 '''
 
 
+def run_dist_bins_exp(ni):
+	i=5000
+	j=1000
+	top = 90
+	step = 10
+	ws={}
+	ns = random_walk(ni,5000)
+	nsi = reindex_dict(ns)
+	shps = shortest_paths(nsi)
+	for x in range(0,top,step):
+		print "BIN ", x, x+step
+		mi=x
+		ma=x+step
+		if x == top-step:
+			ma=10000000000
+		ws[x] = learn_shps_spec(nsi,j,spec=lambda x: distance_range(x, dist_min=mi, dist_max=ma),shps=shps)
+		#ws[x] = learn_bulk(ni, [i], learn_shps_spec, spec=lambda x: distance_range(x, dist_min=mi, dist_max=ma),learn_num=j)
+	return ws
+
+
 def tt(n):
 	k = 0
 	z = 0
@@ -53,6 +73,33 @@ def map_tt(n):
 	map(lambda i: k + i, range(n))
 	return time.time() - ts
 
+def learn_bulk(full, sizes, lfunc, spec=lambda x: True, learn_num=None):
+	if learn_num is None:
+		learn_num = min(sizes)
+	st = time.time()
+	weights = {}
+	for s in range(len(sizes)):
+		weights[s] = lfunc(random_walk(full, sizes[s]), learn_num, spec)
+		print "FINISHED SIZE", s, "time: ", time.time() - st
+	return weights
+
+
+def learn_shps_spec(nodes, num, spec,shps=None):
+	inodes = reindex_dict(nodes)
+	if shps is None:
+		shps = shortest_paths(inodes)
+	inst = extract_instances_random_spec(inodes,num,spec)
+	obj = []
+	for inst_x in inst:
+		og = shps[inst_x['source'].uid, inst_x['destination'].uid]
+		nu = shps[inst_x['step'].uid, inst_x['destination'].uid]
+		if og == nu + 1:
+			obj.append(1)
+		else:
+			obj.append(0)
+	fm = extract_feature_matrix(inst)
+	fms = standardize(fm)
+	return logistic_regression(fms, obj)
 
 def learn_shps(full, sizes):
 	st = time.time()
@@ -571,7 +618,7 @@ def extract_instances_random_spec(nodes, num, spec):
 	return instances
 
 
-def extract_feature(instance, a=0.001, t=275):
+def extract_feature(instance, a=1, t=50):
 	destination = instance["destination"]
 	step = instance["step"]
 	dist = 1. / (distance(step.pos, destination.pos) + 1)
@@ -580,14 +627,15 @@ def extract_feature(instance, a=0.001, t=275):
 
 	degree = step.deg1
 
-	dist_weighted = 1. / (math.tanh(a * (dist - t)) + 1)
+	dist_weighted = 1. / (math.tanh(a * (dist - t)) + 2.)
 	log_degree = math.log(degree)
 
 	return np.array([dist, degree, communities_in_common, dist_weighted, log_degree])
 
 
-def extract_feature_matrix(instances, a=0.001, t=275):
+def extract_feature_matrix(instances, a=1, t=50):
 	feature_transform = []
+	count = 0
 	for i in instances:
 		source = i["source"]
 		destination = i["destination"]
@@ -598,10 +646,13 @@ def extract_feature_matrix(instances, a=0.001, t=275):
 
 		degree = step.deg1
 
-		dist_weighted = 1. / (math.tanh(a * (dist - t)) + 1.)
+		dist_weighted = 1. / (math.tanh(a * (dist - t)) + 2.)
 		log_degree = math.log(degree)
 
 		feature_transform.append([dist, degree, communities_in_common, dist_weighted, log_degree])
+		count += 1
+		if count%100==0:
+			print "Extracted ", count, " instances"
 	return np.array(feature_transform)
 
 

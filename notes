@@ -1,0 +1,11 @@
+run individual bins
+run cumulative bins
+fix latitude and longitude issue
+	-check miles/kilos, degrees/radians
+		-0-3000mi
+
+
+
+parallelize
+
+rerun communities
