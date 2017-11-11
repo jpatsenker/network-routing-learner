@@ -29,12 +29,12 @@ str_w = exps['weighted']/(shps+1.)
 
 
 def run_dist_bins_exp(ni):
-	i=5000
+	i=1000
 	j=1000
 	top = 90
 	step = 10
 	ws={}
-	ns = random_walk(ni,5000)
+	ns = random_walk(ni,i)
 	nsi = reindex_dict(ns)
 	shps = shortest_paths(nsi)
 	for x in range(0,top,step):
@@ -394,8 +394,22 @@ def random_walk(users, size):
 	return popSet
 
 
-def distance(p0, p1):
+def euclid_distance(p0, p1):
 	return math.sqrt((p0[0] - p1[0]) ** 2 + (p0[1] - p1[1]) ** 2)
+
+def deg_to_rad(deg):
+	return deg * math.pi / 180.0
+
+EARTH_RAD_KM = 6371.0
+
+def distance(p0, p1, rad = EARTH_RAD_KM):
+	p0r = (deg_to_rad(p0[0]),deg_to_rad(p0[1]))
+	p1r = (deg_to_rad(p1[0]),deg_to_rad(p1[1]))
+	dlat = abs(p0r[0]-p1r[0])
+	dlon = abs(p0r[1]-p1r[1])
+	a = math.sin(dlat/2.)**2 + math.cos(p0r[0]) * math.cos(p1r[0]) * math.sin(dlon / 2.)**2
+	d_sigma = 2. * math.asin(math.sqrt(a))
+	return rad*d_sigma
 
 def distance_range(inst, dist_min=0, dist_max=1000000):
 	d = distance(inst["destination"].pos, inst["step"].pos)
@@ -618,7 +632,7 @@ def extract_instances_random_spec(nodes, num, spec):
 	return instances
 
 
-def extract_feature(instance, a=1, t=50):
+def extract_feature(instance, a=.01, t=50):
 	destination = instance["destination"]
 	step = instance["step"]
 	dist = 1. / (distance(step.pos, destination.pos) + 1)
@@ -627,13 +641,13 @@ def extract_feature(instance, a=1, t=50):
 
 	degree = step.deg1
 
-	dist_weighted = 1. / (math.tanh(a * (dist - t)) + 2.)
+	dist_weighted = 1. / ((math.tanh(a * (dist - t))+1.01)*(1./a))
 	log_degree = math.log(degree)
 
 	return np.array([dist, degree, communities_in_common, dist_weighted, log_degree])
 
 
-def extract_feature_matrix(instances, a=1, t=50):
+def extract_feature_matrix(instances, a=.01, t=50):
 	feature_transform = []
 	count = 0
 	for i in instances:
@@ -646,7 +660,7 @@ def extract_feature_matrix(instances, a=1, t=50):
 
 		degree = step.deg1
 
-		dist_weighted = 1. / (math.tanh(a * (dist - t)) + 2.)
+		dist_weighted = 1. / ((math.tanh(a * (dist - t))+1.01)*(1./a))
 		log_degree = math.log(degree)
 
 		feature_transform.append([dist, degree, communities_in_common, dist_weighted, log_degree])
