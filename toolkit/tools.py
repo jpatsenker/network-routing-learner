@@ -27,6 +27,20 @@ str_deg = exps['degree']/(shps+1.)
 str_w = exps['weighted']/(shps+1.)
 '''
 
+def run_dist_bins(ni, dist_bins):
+	i=1000
+	j=1000
+	ws={}
+	ns = random_walk(ni,i)
+	nsi = reindex_dict(ns)
+	shps = shortest_paths(nsi)
+	for i in range(len(dist_bins)):
+		x=dist_bins[i]
+		print "BIN ", x[0], x[1]
+		mi=x[0]
+		ma=x[1]
+		ws[i] = learn_shps_spec(nsi,j,spec=lambda x: distance_range(x, dist_min=mi, dist_max=ma),shps=shps)
+	return ws
 
 def run_dist_bins_exp(ni):
 	i=1000
@@ -47,6 +61,13 @@ def run_dist_bins_exp(ni):
 		#ws[x] = learn_bulk(ni, [i], learn_shps_spec, spec=lambda x: distance_range(x, dist_min=mi, dist_max=ma),learn_num=j)
 	return ws
 
+def distance_table(ni):
+	dt = np.zeros([len(ni), len(ni)])
+	for i in ni:
+		print i
+		for j in ni:
+			dt[i,j]=distance(ni[i].pos,ni[j].pos)
+	return dt
 
 def tt(n):
 	k = 0
@@ -663,7 +684,7 @@ def extract_feature_matrix(instances, a=.01, t=50):
 		dist_weighted = 1. / ((math.tanh(a * (dist - t))+1.01)*(1./a))
 		log_degree = math.log(degree)
 
-		feature_transform.append([dist, degree, communities_in_common, dist_weighted, log_degree])
+		feature_transform.append([dist, degree, communities_in_common, dist_weighted])#, log_degree])
 		count += 1
 		if count%100==0:
 			print "Extracted ", count, " instances"
