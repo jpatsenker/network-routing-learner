@@ -31,6 +31,7 @@ incorporate clustering
 ^does airport network correlate to gowalla?
 	-P(community|airport)
 	-P(link|air-link)
+	-get hubs [community point]
 
 try 100/1000 random nodes (higher distance bins, not friends)
 
