@@ -27,6 +27,25 @@ str_deg = exps['degree']/(shps+1.)
 str_w = exps['weighted']/(shps+1.)
 '''
 
+def run_even_dist_bins(ni, dist_bins):
+	i=1000
+	j=1000
+	ws={}
+	objs={}
+	ns = random_walk(ni,i)
+	nsi = reindex_dict(ns)
+	shps = get_expectations_iters(nsi)
+	for i in range(len(dist_bins)):
+		x=dist_bins[i]
+		print "BIN ", x[0], x[1]
+		mi=x[0]
+		ma=x[1]
+		ws[i],objs[i] = extract_spec_exp(nsi,j,spec=lambda x: distance_range(x, dist_min=mi, dist_max=ma),shps=shps)
+	fm = np.concatenate(ws.values(),axis=0)
+	ys = np.concatenate(objs.values(),axis=0)
+	fms = standardize(fm)
+	return logistic_regression(fms,ys)
+
 def run_dist_bins(ni, dist_bins):
 	i=1000
 	j=1000
@@ -64,7 +83,6 @@ def run_dist_bins_exp(ni):
 def distance_table(ni):
 	dt = np.zeros([len(ni), len(ni)])
 	for i in ni:
-		print i
 		for j in ni:
 			dt[i,j]=distance(ni[i].pos,ni[j].pos)
 	return dt
@@ -121,6 +139,37 @@ def learn_shps_spec(nodes, num, spec,shps=None):
 	fm = extract_feature_matrix(inst)
 	fms = standardize(fm)
 	return logistic_regression(fms, obj)
+
+
+def extract_spec(nodes, num, spec,shps=None):
+	inodes = reindex_dict(nodes)
+	if shps is None:
+		shps = shortest_paths(inodes)
+	inst = extract_instances_random_spec(inodes,num,spec)
+	obj = []
+	for inst_x in inst:
+		og = shps[inst_x['source'].uid, inst_x['destination'].uid]
+		nu = shps[inst_x['step'].uid, inst_x['destination'].uid]
+		if og == nu + 1:
+			obj.append(1)
+		else:
+			obj.append(0)
+	return extract_feature_matrix(inst), obj
+
+def extract_spec_exp(nodes, num, spec,shps=None):
+	inodes = reindex_dict(nodes)
+	if shps is None:
+		shps = get_expectations(inodes)
+	inst = extract_instances_random_spec(inodes,num,spec)
+	obj = []
+	for inst_x in inst:
+		og = shps[inst_x['source'].uid, inst_x['destination'].uid]
+		nu = shps[inst_x['step'].uid, inst_x['destination'].uid]
+		if og == nu + 1:
+			obj.append(1)
+		else:
+			obj.append(0)
+	return extract_feature_matrix(inst), obj
 
 def learn_shps(full, sizes):
 	st = time.time()
@@ -668,7 +717,7 @@ def extract_feature(instance, a=.01, t=50):
 	return np.array([dist, degree, communities_in_common, dist_weighted, log_degree])
 
 
-def extract_feature_matrix(instances, a=.01, t=50):
+def extract_feature_matrix(instances, a=.001, t=3000):
 	feature_transform = []
 	count = 0
 	for i in instances:
@@ -684,7 +733,7 @@ def extract_feature_matrix(instances, a=.01, t=50):
 		dist_weighted = 1. / ((math.tanh(a * (dist - t))+1.01)*(1./a))
 		log_degree = math.log(degree)
 
-		feature_transform.append([dist, degree, communities_in_common, dist_weighted])#, log_degree])
+		feature_transform.append([dist, degree, communities_in_common, dist_weighted, log_degree])
 		count += 1
 		if count%100==0:
 			print "Extracted ", count, " instances"
@@ -693,7 +742,7 @@ def extract_feature_matrix(instances, a=.01, t=50):
 
 def logistic_regression(fms, ys):
 	l = LogisticRegression()
-	print fms
+	#print fms
 	l.fit(fms, ys)
 	weights = l.coef_[0]
 	return weights

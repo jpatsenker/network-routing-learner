@@ -9,3 +9,27 @@ fix latitude and longitude issue
 parallelize
 
 rerun communities
+
+11/15
+
+rerun communities/parallelize
+
+log-bins
+
+buster's method: fraction of paths that lead to destination
+
+can we get the airport network? -city (node), edge (flight)
+	-compare random, distance, and learned network
+	-weight edges by number of flights
+		-multigraph
+
+greyhound/bus network as well (later)
+
+incorporate clustering
+
+
+^does airport network correlate to gowalla?
+	-P(community|airport)
+	-P(link|air-link)
+
+try 100/1000 random nodes (higher distance bins, not friends)
