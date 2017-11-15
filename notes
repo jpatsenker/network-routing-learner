@@ -33,3 +33,5 @@ incorporate clustering
 	-P(link|air-link)
 
 try 100/1000 random nodes (higher distance bins, not friends)
+
+for airport network: census, city, location, population, etc... [elevation, rainfall]
