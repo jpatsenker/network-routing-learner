@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from core.user import User
 import cPickle as pickle
@@ -345,6 +346,32 @@ def load_dict():
 	nodes = pickle.load(open("GraphSets/nodes_data_dictionary.pkl", 'r'))
 	return nodes
 
+def load_airport_dict():
+	nodes = []
+	ap = pd.read_csv("data/airport_net/airports.dat")
+	ro = pd.read_csv("data/airport_net/routes.dat")
+
+	ap_mat = ap.as_matrix()
+	ro_mat = ro.as_matrix()
+
+	rel_ap = ap_mat[:,0:8]
+	rel_ro = np.stack([ro_mat[:,3],ro_mat[:,5]],axis=1)
+
+	rar = {}
+	for a in range(rel_ap.shape[0]):
+		rar[int(rel_ap[a,0])] = a
+
+	adj_list = np.zeros([len(rel_ap), len(rel_ap)])
+
+	for i in range(len(rel_ap)):
+		nodes.append([float(rel_ap[i,6]),float(rel_ap[i,7])])
+
+	for ro in range(len(rel_ro)):
+		if rel_ro[ro,0] != "\\N" and rel_ro[ro,1] != "\\N":
+			print rel_ro[ro,0], rel_ro[ro,1]
+			adj_list[rar[int(rel_ro[ro,0])],rar[int(rel_ro[ro,1])]] += 1
+
+	return np.array(nodes),adj_list
 
 def reindex_dict(nodes):
 	inodes = dict()
