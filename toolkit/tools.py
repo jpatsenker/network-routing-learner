@@ -360,6 +360,7 @@ def load_airport_dict():
 	rar = {}
 	for a in range(rel_ap.shape[0]):
 		rar[int(rel_ap[a,0])] = a
+	rar_keys = set(rar.keys())
 
 	adj_list = np.zeros([len(rel_ap), len(rel_ap)])
 
@@ -368,8 +369,8 @@ def load_airport_dict():
 
 	for ro in range(len(rel_ro)):
 		if rel_ro[ro,0] != "\\N" and rel_ro[ro,1] != "\\N":
-			print rel_ro[ro,0], rel_ro[ro,1]
-			adj_list[rar[int(rel_ro[ro,0])],rar[int(rel_ro[ro,1])]] += 1
+			if int(rel_ro[ro,0]) in rar_keys and int(rel_ro[ro,1]) in rar_keys:
+				adj_list[rar[int(rel_ro[ro,0])],rar[int(rel_ro[ro,1])]] += 1
 
 	return np.array(nodes),adj_list
 
