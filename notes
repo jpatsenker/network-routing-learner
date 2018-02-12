@@ -36,3 +36,14 @@ incorporate clustering
 try 100/1000 random nodes (higher distance bins, not friends)
 
 for airport network: census, city, location, population, etc... [elevation, rainfall]
+
+
+---11/29
+
+
+find bus net: bureau of transportation statistics
+intermodal passenger connectivity database
+https://web.coachusa.com/shortline/ss.intercity.asp
+greyhound scrape website
+
+chitish (malik's grad student), ask for networks (with geolocations)
