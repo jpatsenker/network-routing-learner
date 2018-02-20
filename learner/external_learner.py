@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import cProfile
 #import matplotlib.pyplot as plt
 #from sklearn.decomposition import PCA
 
@@ -212,4 +213,4 @@ def easy_lin_regressor_unit_test():
 	# plt.show()
 	#print calculate_class_error(Xs, ys, lambda x: er.classify(x))
 
-easy_lin_regressor_unit_test()
+cProfile.run("easy_lin_regressor_unit_test()")
