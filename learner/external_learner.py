@@ -113,7 +113,7 @@ def lm_opt_onepass(w, f, data, y, conv):
 	fn=10000000.
 	while fn>conv:
 		fp = np.copy(fn)
-		fn, grad, hess = f(w,p,y)
+		fn, grad, hess = f(w,data,y)
 		if fp < fn:
 			eta *= 10.
 		else:
