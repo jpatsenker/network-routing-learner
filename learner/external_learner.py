@@ -1,8 +1,8 @@
 import numpy as np
 import time
 import math
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
+#import matplotlib.pyplot as plt
+#from sklearn.decomposition import PCA
 
 
 def cross_entropy_error_from_file(w, data, labels):
