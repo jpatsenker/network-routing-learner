@@ -4,6 +4,55 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 
+def cross_entropy_error_from_file(w, data, labels):
+	ss = 0
+	count=0
+	with open(data) as f:
+		with open(labels) as g:
+			x=f.readline()
+			y=g.readline()
+			while x:
+				x=np.fromstring(x,dtype=float,sep=' ')
+				y=float(y)
+				ss += np.log(1. + math.e**(-y*np.dot(w,x)))
+				x=f.readline()
+				y=g.readline()
+				count+=1
+	return 1./float(count) * ss
+
+
+def grad_cross_entropy_error_from_file(w, data, labels):
+	ss = np.zeros(w.shape)
+	count=0
+	with open(data) as f:
+		with open(labels) as g:
+			x=f.readline()
+			y=g.readline()
+			while x:
+				x=np.fromstring(x,dtype=float,sep=' ')
+				y=float(y)
+				ss += (-y*x)/(1.+math.e**(y*np.dot(w,x)))
+				x=f.readline()
+				y=g.readline()
+				count+=1
+	return 1/float(count) * ss
+
+def hess_cross_entropy_error_from_file(w, data, labels):
+	ss = np.zeros([w.shape[0],w.shape[0]])
+	count=0
+	with open(data) as f:
+		with open(labels) as g:
+			x=f.readline()
+			y=g.readline()
+			while x:
+				x=np.fromstring(x,dtype=float,sep=' ')
+				y=float(y)
+				ss += -(y)**2*np.outer(x,x)*np.e**(y*np.dot(w,x))/((1.+np.e**(y*np.dot(w,x)))**2)
+				x=f.readline()
+				y=g.readline()
+				count+=1
+	return 1/float(count) * ss
+
 def cross_entropy_error(w, x, y):
 	ss = 0
 	i = 0
@@ -19,39 +68,33 @@ def grad_cross_entropy_error(w, x, y):
 	while i<x.shape[0]:
 		ss += (-y[i]*x[i])/(1.+math.e**(y[i]*np.dot(w,x[i])))
 		i += 1
-	#print ss
 	return 1/float(x.shape[0]) * ss
 
 def hess_cross_entropy_error(w, x, y):
 	ss = np.zeros([w.shape[0],w.shape[0]])
 	i = 0
 	while i<x.shape[0]:
-		print ((1.+np.e**(y[i]*np.dot(w,x[i])))**2)
 		ss += -(y[i])**2*np.outer(x[i],x[i])*np.e**(y[i]*np.dot(w,x[i]))/((1.+np.e**(y[i]*np.dot(w,x[i])))**2)
 		i += 1
 	return 1/float(x.shape[0]) * ss
+
+
 
 def l2norm(x):
 	return np.sqrt(np.sum(x**2))
 
 def lm_update(w, grad, hess, p, eta, y):
 	iden = np.identity(w.shape[0])
-	#print hess(w,p,y)
 	wn = w + np.dot(np.linalg.pinv(hess(w,p,y) - eta*iden),grad(w,p,y))
 	return wn
 
 def lm_opt(w, f, grad, hess, data, y,conv):
 	eta = 1.
-	error = f(w,data,y)
-	w_prev = np.ones(w.shape) * 10000000.
 	fn=10000000.
-	while l2norm(w-w_prev)>conv:
-		print "iter with ", eta, l2norm(w-w_prev), conv
-		w_prev = np.copy(w)
+	while fn>conv:
 		fp = np.copy(fn)
 		w = lm_update(w, grad, hess, data, eta, y)
 		fn = f(w,data,y)
-		print "error:", fn, fp
 		if fp < fn:
 			eta *= 10.
 		else:
@@ -107,9 +150,7 @@ class ExternalLogisticRegressor:
 
 	def regressFromFile(self,data,labels):
 		ws = self.init_reg.regressFromFile(data, labels)
-		Xs = np.loadtxt(data)
-		ys = np.loadtxt(labels)
-		self.w = lm_opt(ws,cross_entropy_error,grad_cross_entropy_error,hess_cross_entropy_error,Xs,ys, .01)
+		self.w = lm_opt(ws,cross_entropy_error_from_file,grad_cross_entropy_error_from_file,hess_cross_entropy_error_from_file,data,labels, 10e-5)
 		return self.w
 
 
@@ -137,7 +178,6 @@ def easy_lin_regressor_unit_test():
 
 	zws = pca.transform([ws])
 
-	print zws
 	delta = 0.025
 	xsp = np.arange(-1.0, 1.0, delta)
 	ysp = np.arange(-1.0, 1.0, delta)
