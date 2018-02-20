@@ -1,6 +1,5 @@
 import numpy as np
 import time
-import math
 #import matplotlib.pyplot as plt
 #from sklearn.decomposition import PCA
 
@@ -15,7 +14,7 @@ def cross_entropy_error_from_file(w, data, labels):
 			while x:
 				x=np.fromstring(x,dtype=float,sep=' ')
 				y=float(y)
-				ss += np.log(1. + math.e**(-y*np.dot(w,x)))
+				ss += np.log(1. + np.e**(-y*np.dot(w,x)))
 				x=f.readline()
 				y=g.readline()
 				count+=1
@@ -32,7 +31,7 @@ def grad_cross_entropy_error_from_file(w, data, labels):
 			while x:
 				x=np.fromstring(x,dtype=float,sep=' ')
 				y=float(y)
-				ss += (-y*x)/(1.+math.e**(y*np.dot(w,x)))
+				ss += (-y*x)/(1.+np.e**(y*np.dot(w,x)))
 				x=f.readline()
 				y=g.readline()
 				count+=1
@@ -58,7 +57,7 @@ def cross_entropy_error(w, x, y):
 	ss = 0
 	i = 0
 	while i < x.shape[0]:
-		ss += np.log(1. + math.e**(-y[i]*np.dot(w,x[i])))
+		ss += np.log(1. + np.e**(-y[i]*np.dot(w,x[i])))
 		i += 1
 	return 1./float(x.shape[0]) * ss
 
@@ -67,7 +66,7 @@ def grad_cross_entropy_error(w, x, y):
 	ss = np.zeros(w.shape)
 	i = 0
 	while i<x.shape[0]:
-		ss += (-y[i]*x[i])/(1.+math.e**(y[i]*np.dot(w,x[i])))
+		ss += (-y[i]*x[i])/(1.+np.e**(y[i]*np.dot(w,x[i])))
 		i += 1
 	return 1/float(x.shape[0]) * ss
 
