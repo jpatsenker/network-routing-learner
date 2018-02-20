@@ -1,4 +1,5 @@
 import numpy as np
+import time
 import math
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
@@ -89,6 +90,7 @@ def lm_update(w, grad, hess, p, eta, y):
 	return wn
 
 def lm_opt(w, f, grad, hess, data, y,conv):
+	t=time.time()
 	eta = 1.
 	fn=10000000.
 	while fn>conv:
@@ -99,6 +101,7 @@ def lm_opt(w, f, grad, hess, data, y,conv):
 			eta *= 10.
 		else:
 			eta *= .1
+		print "Iter comlplete with ", eta, time.time()-t
 	return w
 
 class ExternalRegressor:
@@ -149,7 +152,9 @@ class ExternalLogisticRegressor:
 		return -1.
 
 	def regressFromFile(self,data,labels):
+		t=time.time()
 		ws = self.init_reg.regressFromFile(data, labels)
+		print "Lin Reg complete", time.time()-t
 		self.w = lm_opt(ws,cross_entropy_error_from_file,grad_cross_entropy_error_from_file,hess_cross_entropy_error_from_file,data,labels, 10e-5)
 		return self.w
 
@@ -163,30 +168,30 @@ def calculate_class_error(Xs,ys,cfunc):
 def easy_lin_regressor_unit_test():
 	er = ExternalLogisticRegressor()
 
-	ws= er.regressFromFile("rand_xs.txt", "rand_ys.txt")
+	ws= er.regressFromFile("~/rand_xs.txt", "~/rand_ys.txt")
 
-	Xs = np.loadtxt("rand_xs.txt")
-	ys = np.loadtxt("rand_ys.txt")
-
-	pca = PCA(11)
-
-	Zs = pca.fit_transform(Xs)
-
-	print ws
-
-	plt.scatter(Zs[:,0], Zs[:,1], c=ys)
-
-	zws = pca.transform([ws])
-
-	delta = 0.025
-	xsp = np.arange(-1.0, 1.0, delta)
-	ysp = np.arange(-1.0, 1.0, delta)
-	Xsp, Ysp = np.meshgrid(xsp, ysp)
-	Zsp = zws[0,0]*Xsp + zws[0,1]*Ysp
-
-	plt.contour(Xsp, Ysp, Zsp, [0])
-
-	plt.show()
-	print calculate_class_error(Xs, ys, lambda x: er.classify(x))
+	# Xs = np.loadtxt("rand_xs.txt")
+	# ys = np.loadtxt("rand_ys.txt")
+	#
+	# pca = PCA(11)
+	#
+	# Zs = pca.fit_transform(Xs)
+	#
+	# print ws
+	#
+	# plt.scatter(Zs[:,0], Zs[:,1], c=ys)
+	#
+	# zws = pca.transform([ws])
+	#
+	# delta = 0.025
+	# xsp = np.arange(-1.0, 1.0, delta)
+	# ysp = np.arange(-1.0, 1.0, delta)
+	# Xsp, Ysp = np.meshgrid(xsp, ysp)
+	# Zsp = zws[0,0]*Xsp + zws[0,1]*Ysp
+	#
+	# plt.contour(Xsp, Ysp, Zsp, [0])
+	#
+	# plt.show()
+	#print calculate_class_error(Xs, ys, lambda x: er.classify(x))
 
 easy_lin_regressor_unit_test()
