@@ -5,7 +5,9 @@ import time
 
 
 def cross_entropy_error_from_file(w, data, labels):
-	ss = 0
+	se = 0
+	sg = 0
+	sh = 0
 	count=0
 	with open(data) as f:
 		with open(labels) as g:
@@ -14,44 +16,45 @@ def cross_entropy_error_from_file(w, data, labels):
 			while x:
 				x=np.fromstring(x,dtype=float,sep=' ')
 				y=float(y)
-				ss += np.log(1. + np.e**(-y*np.dot(w,x)))
+				se += np.log(1. + np.e**(-y*np.dot(w,x)))
+				sg += (-y*x)/(1.+np.e**(y*np.dot(w,x)))
+				sh += -(y)**2*np.outer(x,x)*np.e**(y*np.dot(w,x))/((1.+np.e**(y*np.dot(w,x)))**2)
 				x=f.readline()
 				y=g.readline()
 				count+=1
-	return 1./float(count) * ss
+	return 1./float(count) * se, 1./float(count) * sg, 1./float(count) * sh
 
-
-def grad_cross_entropy_error_from_file(w, data, labels):
-	ss = np.zeros(w.shape)
-	count=0
-	with open(data) as f:
-		with open(labels) as g:
-			x=f.readline()
-			y=g.readline()
-			while x:
-				x=np.fromstring(x,dtype=float,sep=' ')
-				y=float(y)
-				ss += (-y*x)/(1.+np.e**(y*np.dot(w,x)))
-				x=f.readline()
-				y=g.readline()
-				count+=1
-	return 1/float(count) * ss
-
-def hess_cross_entropy_error_from_file(w, data, labels):
-	ss = np.zeros([w.shape[0],w.shape[0]])
-	count=0
-	with open(data) as f:
-		with open(labels) as g:
-			x=f.readline()
-			y=g.readline()
-			while x:
-				x=np.fromstring(x,dtype=float,sep=' ')
-				y=float(y)
-				ss += -(y)**2*np.outer(x,x)*np.e**(y*np.dot(w,x))/((1.+np.e**(y*np.dot(w,x)))**2)
-				x=f.readline()
-				y=g.readline()
-				count+=1
-	return 1/float(count) * ss
+# def grad_cross_entropy_error_from_file(w, data, labels):
+# 	ss = np.zeros(w.shape)
+# 	count=0
+# 	with open(data) as f:
+# 		with open(labels) as g:
+# 			x=f.readline()
+# 			y=g.readline()
+# 			while x:
+# 				x=np.fromstring(x,dtype=float,sep=' ')
+# 				y=float(y)
+# 				ss += (-y*x)/(1.+np.e**(y*np.dot(w,x)))
+# 				x=f.readline()
+# 				y=g.readline()
+# 				count+=1
+# 	return 1/float(count) * ss
+#
+# def hess_cross_entropy_error_from_file(w, data, labels):
+# 	ss = np.zeros([w.shape[0],w.shape[0]])
+# 	count=0
+# 	with open(data) as f:
+# 		with open(labels) as g:
+# 			x=f.readline()
+# 			y=g.readline()
+# 			while x:
+# 				x=np.fromstring(x,dtype=float,sep=' ')
+# 				y=float(y)
+# 				ss += -(y)**2*np.outer(x,x)*np.e**(y*np.dot(w,x))/((1.+np.e**(y*np.dot(w,x)))**2)
+# 				x=f.readline()
+# 				y=g.readline()
+# 				count+=1
+# 	return 1/float(count) * ss
 
 def cross_entropy_error(w, x, y):
 	ss = 0
@@ -100,6 +103,22 @@ def lm_opt(w, f, grad, hess, data, y,conv):
 			eta *= 10.
 		else:
 			eta *= .1
+		print "Iter comlplete with ", eta, time.time()-t
+	return w
+
+
+def lm_opt_onepass(w, f, data, y, conv):
+	t=time.time()
+	eta = 1.
+	fn=10000000.
+	while fn>conv:
+		fp = np.copy(fn)
+		fn, grad, hess = f(w,p,y)
+		if fp < fn:
+			eta *= 10.
+		else:
+			eta *= .1
+		w += np.dot(np.linalg.pinv(hess - eta*np.identity(w.shape[0])),grad)
 		print "Iter comlplete with ", eta, time.time()-t
 	return w
 
@@ -154,7 +173,7 @@ class ExternalLogisticRegressor:
 		t=time.time()
 		ws = self.init_reg.regressFromFile(data, labels)
 		print "Lin Reg complete", time.time()-t
-		self.w = lm_opt(ws,cross_entropy_error_from_file,grad_cross_entropy_error_from_file,hess_cross_entropy_error_from_file,data,labels, 10e-5)
+		self.w = lm_opt_onepass(ws,cross_entropy_error_from_file,data,labels, 0.001)
 		return self.w
 
 
