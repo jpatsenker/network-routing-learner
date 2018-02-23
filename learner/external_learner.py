@@ -20,9 +20,10 @@ def cross_entropy_error_from_file(w, data, labels):
 				y=float(y)
 				exppart=np.e**(y*np.dot(w,x))
 				part2 = -y/(1.+exppart)
-				se += (np.log(1. + 1./exppart)-se)/count
-				sg += (x*part2-sg)/count
-				sh += (-part2**2*np.outer(x,x)*exppart-sh)/count
+				invc=1./count
+				se += (np.log(1. + 1./exppart)-se)*invc
+				sg += (x*part2-sg)*invc
+				sh += (-part2**2*np.outer(x,x)*exppart-sh)*invc
 				x=f.readline()
 				y=g.readline()
 	return se, sg, sh
@@ -122,7 +123,7 @@ def lm_opt_onepass(w, f, data, y, conv):
 		else:
 			eta *= .1
 		w += np.dot(np.linalg.pinv(hess - eta*np.identity(w.shape[0])),grad)
-		print "Iter comlplete with ", eta, time.time()-t
+		print "Iter complete with ", eta, time.time()-t
 	return w
 
 class ExternalRegressor:
@@ -203,7 +204,8 @@ def calculate_class_error(Xs,ys,cfunc):
 def easy_lin_regressor_unit_test():
 	er = ExternalLogisticRegressor()
 
-	ws= er.regressFromFile("../../rand_xs.txt", "../../rand_ys.txt")
+	ws= er.regressFromFile("rand_xs.txt", "rand_ys.txt")
+	#ws= er.regressFromFile("../../rand_xs.txt", "../../rand_ys.txt")
 
 	# Xs = np.loadtxt("rand_xs.txt")
 	# ys = np.loadtxt("rand_ys.txt")
