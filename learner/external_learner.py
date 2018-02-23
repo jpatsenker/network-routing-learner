@@ -17,9 +17,10 @@ def cross_entropy_error_from_file(w, data, labels):
 			while x:
 				x=np.fromstring(x,dtype=float,sep=' ')
 				y=float(y)
-				se += np.log(1. + np.e**(-y*np.dot(w,x)))
-				sg += (-y*x)/(1.+np.e**(y*np.dot(w,x)))
-				sh += -(y)**2*np.outer(x,x)*np.e**(y*np.dot(w,x))/((1.+np.e**(y*np.dot(w,x)))**2)
+				exppart=np.e**(y*np.dot(w,x))
+				se += np.log(1. + 1./exppart)
+				sg += (-y*x)/(1.+exppart)
+				sh += -(y)**2*np.outer(x,x)*exppart/((1.+exppart)**2)
 				x=f.readline()
 				y=g.readline()
 				count+=1
