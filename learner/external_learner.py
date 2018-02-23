@@ -9,23 +9,23 @@ def cross_entropy_error_from_file(w, data, labels):
 	se = 0
 	sg = 0
 	sh = 0
-	count=0
+	count=0.
 	with open(data) as f:
 		with open(labels) as g:
 			x=f.readline()
 			y=g.readline()
 			while x:
+				count+=1.
 				x=np.fromstring(x,dtype=float,sep=' ')
 				y=float(y)
 				exppart=np.e**(y*np.dot(w,x))
 				part2 = -y/(1.+exppart)
-				se += np.log(1. + 1./exppart)
-				sg += x*part2
-				sh += -part2**2*np.outer(x,x)*exppart
+				se += (np.log(1. + 1./exppart)-se)/count
+				sg += (x*part2-sg)/count
+				sh += (-part2**2*np.outer(x,x)*exppart-sh)/count
 				x=f.readline()
 				y=g.readline()
-				count+=1
-	return 1./float(count) * se, 1./float(count) * sg, 1./float(count) * sh
+	return se, sg, sh
 
 # def grad_cross_entropy_error_from_file(w, data, labels):
 # 	ss = np.zeros(w.shape)
@@ -185,6 +185,20 @@ def calculate_class_error(Xs,ys,cfunc):
 	err_num=sum(((ys-hs)/2.)**2)
 	return float(err_num)/float(Xs.shape[0])
 
+# def calculate_class_error_from_file(f,g,cfunc):
+# 	with open(data) as f:
+# 		with open(labels) as g:
+# 			x=f.readline()
+# 			y=g.readline()
+# 			errnum=0
+# 			i=0
+# 			while x:
+# 				i+=1
+# 				errnum=((y-cfunc(x))/2.)**2
+# 				x=f.readline()
+# 				y=g.readline()
+# 	return errnum
+
 
 def easy_lin_regressor_unit_test():
 	er = ExternalLogisticRegressor()
@@ -213,6 +227,6 @@ def easy_lin_regressor_unit_test():
 	# plt.contour(Xsp, Ysp, Zsp, [0])
 	#
 	# plt.show()
-	#print calculate_class_error(Xs, ys, lambda x: er.classify(x))
+	#print calculate_class_error_from_file(Xs, ys, lambda x: er.classify(x))
 
 cProfile.run("easy_lin_regressor_unit_test()")
