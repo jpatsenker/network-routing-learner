@@ -21,7 +21,7 @@ def cross_entropy_error_from_file(w, data, labels):
 				part2 = -y/(1.+exppart)
 				se += np.log(1. + 1./exppart)
 				sg += x*part2
-				sh += part2**2*np.outer(x,x)*exppart
+				sh += -part2**2*np.outer(x,x)*exppart
 				x=f.readline()
 				y=g.readline()
 				count+=1
