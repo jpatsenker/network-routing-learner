@@ -111,10 +111,10 @@ def lm_opt(w, f, grad, hess, data, y,conv):
 
 
 def lm_opt_onepass(w, f, data, y, conv):
-	t=time.time()
 	eta = 1.
 	fn=10000000.
 	while fn>conv:
+		t=time.time()
 		fp = np.copy(fn)
 		fn, grad, hess = f(w,data,y)
 		if fp < fn:
