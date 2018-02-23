@@ -19,10 +19,9 @@ def cross_entropy_error_from_file(w, data, labels):
 				y=float(y)
 				exppart=np.e**(y*np.dot(w,x))
 				part2 = -y/(1.+exppart)
-				gupdate = x*part2
 				se += np.log(1. + 1./exppart)
-				sg += gupdate
-				sh += -np.outer(x,gupdate*part2)*exppart
+				sg += x*part2
+				sh += part2**2*np.outer(x,x)*exppart
 				x=f.readline()
 				y=g.readline()
 				count+=1
@@ -177,7 +176,7 @@ class ExternalLogisticRegressor:
 		t=time.time()
 		ws = self.init_reg.regressFromFile(data, labels)
 		print "Lin Reg complete", time.time()-t
-		self.w = lm_opt_onepass(ws,cross_entropy_error_from_file,data,labels, 0.1)
+		self.w = lm_opt_onepass(ws,cross_entropy_error_from_file,data,labels, 0.001)
 		return self.w
 
 
