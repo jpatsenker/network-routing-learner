@@ -176,7 +176,7 @@ class ExternalLogisticRegressor:
 		t=time.time()
 		ws = self.init_reg.regressFromFile(data, labels)
 		print "Lin Reg complete", time.time()-t
-		self.w = lm_opt_onepass(ws,cross_entropy_error_from_file,data,labels, 0.001)
+		self.w = lm_opt_onepass(ws,cross_entropy_error_from_file,data,labels, 0.1)
 		return self.w
 
 
