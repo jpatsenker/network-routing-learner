@@ -204,8 +204,8 @@ def calculate_class_error(Xs,ys,cfunc):
 def easy_lin_regressor_unit_test():
 	er = ExternalLogisticRegressor()
 
-	ws= er.regressFromFile("rand_xs.txt", "rand_ys.txt")
-	#ws= er.regressFromFile("../../rand_xs.txt", "../../rand_ys.txt")
+	#ws= er.regressFromFile("rand_xs.txt", "rand_ys.txt")
+	ws= er.regressFromFile("../../rand_xs.txt", "../../rand_ys.txt")
 
 	# Xs = np.loadtxt("rand_xs.txt")
 	# ys = np.loadtxt("rand_ys.txt")
