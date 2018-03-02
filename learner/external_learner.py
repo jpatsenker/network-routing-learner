@@ -342,5 +342,6 @@ def easy_lin_regressor_unit_test():
 	plt.show()
 	#print calculate_class_error_from_file(Xs, ys, lambda x: er.classify(x))
 
+
 #cProfile.run("easy_lin_regressor_unit_test()")
 cProfile.run("long_lin_regressor_unit_test()")
