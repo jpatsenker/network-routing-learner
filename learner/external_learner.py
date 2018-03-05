@@ -311,6 +311,12 @@ def long_lin_regressor_unit_test():
 
 	ws = er.regressFromFileMultithreaded("big_dat.txt")
 
+def run():
+	er = ExternalLogisticRegressor()
+
+	ws = er.regressFromFileMultithreaded("gowalla_ml_dataset.txt")
+
+
 def easy_lin_regressor_unit_test():
 	er = ExternalLogisticRegressor()
 
@@ -344,4 +350,4 @@ def easy_lin_regressor_unit_test():
 
 
 #cProfile.run("easy_lin_regressor_unit_test()")
-cProfile.run("long_lin_regressor_unit_test()")
+cProfile.run("run()")

@@ -53,29 +53,60 @@ def load_dict():
 	nodes = pickle.load(open("GraphSets/test_graph.pkl", 'r'))
 	return nodes
 
+
+
 def graph_to_dataset_file(graph,filename,shps="shortest_paths.txt",exps="expected_paths.txt"):
 	with open(filename,'w') as writer:
 		with open(shps) as shpsr:
 			with open(exps) as expsr:
-				for source in graph:
-					s=graph[source]
-					tar1 = map(float, shpsr.readline().split(' '))
-					tar2 = map(float, expsr.readline().split(' '))
-					for dest in graph:
-						d = graph[dest]
-						for neighbor in s.friends:
-							n = graph[neighbor]
-							dist = distance(n.pos,d.pos)
-							wdist = sig1(dist)
-							cic = len(set(n.comm).intersection(d.comm))
-							deg = n.deg1
-							wdeg = math.log(deg)
-							medpower = np.median(map(lambda z: graph[z].deg1, n.friends))
-							locality = sum(map(lambda z: distance(graph[z].pos,graph[s].pos), n.friends))
-							###TODO: ADD OTHER FEATURES
-							t1 = tar1[dest]
-							t2 = tar2[dest]
+				for destination in graph:
+					d=graph[destination]
+					for neighbor in graph:
+						n = graph[neighbor]
+						deg = n.deg1
+						wdeg = math.log(deg)
+						d = graph[destination]
+						dist = distance(n.pos,d.pos)
+						wdist = sig1(dist)
+						cic = len(set(n.comm).intersection(d.comm))
+						medpower = np.median(map(lambda z: graph[z].deg1, n.friends))
+						nf = n.friends
+						for source in nf:
+							s=graph[source]
+							locality = sum(map(lambda z: distance(graph[z].pos,s.pos), n.friends))
 							writer.write("\t".join([str(dist),str(wdist),str(cic),str(deg),str(wdeg),str(medpower),str(locality),str(t1),str(t2)]) + '\n')
+
+
+# def graph_to_dataset_file1(graph,filename,shps="shortest_paths.txt",exps="expected_paths.txt"):
+# 	with open(filename,'w') as writer:
+# 		with open(shps) as shpsr:
+# 			with open(exps) as expsr:
+# 				for source in graph:
+# 					s=graph[source]
+# 					tar1 = map(float, shpsr.readline().split(' '))
+# 					tar2 = map(float, expsr.readline().split(' '))
+# 					for dest in graph:
+# 						d = graph[dest]
+# 						t1vals=[]
+# 						t2vals=[]
+# 						for neighbor in s.friends:
+# 							t1vals.append(tar1[neighbor])
+# 						for neighbor in s.friends:
+# 							n = graph[neighbor]
+# 							dist = distance(n.pos,d.pos)
+# 							wdist = sig1(dist)
+# 							cic = len(set(n.comm).intersection(d.comm))
+# 							deg = n.deg1
+# 							wdeg = math.log(deg)
+# 							medpower = np.median(map(lambda z: graph[z].deg1, n.friends))
+# 							locality = sum(map(lambda z: distance(graph[z].pos,s.pos), n.friends))
+# 							###TODO: ADD OTHER FEATURES
+# 							t1 = -1.
+# 							t2 = -1.
+# 							if
+# 								t1 = 1.
+# 								t2 = 1.
+# 							writer.write("\t".join([str(dist),str(wdist),str(cic),str(deg),str(wdeg),str(medpower),str(locality),str(t1),str(t2)]) + '\n')
 
 def bfs(graph,i):
 	bfo = [-1] * len(graph)
@@ -169,9 +200,9 @@ import numpy as np
 import time
 
 t=time.time()
-#d = load_dict()
+d = load_dict()
 
-d=test_graph(100)
+#d=test_graph(100)
 
 
 print "LOADED: ", time.time()-t
