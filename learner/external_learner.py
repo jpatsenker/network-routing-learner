@@ -199,6 +199,7 @@ def delegateRegress(f,numpoints,ret,pnum):
 		c+=1
 #		if c%100==0:
 #			print c
+	print "p done", pnum
 	ret[pnum]=[xtx,xty]
 
 
@@ -249,6 +250,7 @@ class ExternalRegressor:
 			p=Process(target=delegateRegress, args=(fs[i-1], num_points, ret,i-1))
 			ps.append(p)
 			p.start()
+			print "start", p
 		for i in range(len(ps)):
 			ps[i].join()
 			xtx[i], xty[i] = ret[i]
@@ -276,8 +278,8 @@ class ExternalLogisticRegressor:
 
 	def regressFromFileMultithreaded(self,data):
 		t=time.time()
-		NPTS=100000
-		NDIV=1
+		NPTS=4622000
+		NDIV=2
 		splits = get_split_points(data, NPTS/NDIV)
 		print "splits calc: ", time.time()-t
 		t=time.time()

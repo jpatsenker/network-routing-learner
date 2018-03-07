@@ -121,7 +121,7 @@ def get_avg_and_var(dataset_file):
 	var = 0
 	with open(dataset_file) as reader:
 		line = reader.readline()
-		count=0.
+		count=1.
 		while line:
 			x = np.fromstring(line, dtype='float', sep=' ')
 			prev_avg = np.copy(avg)
@@ -135,13 +135,15 @@ def get_avg_and_var(dataset_file):
 
 def normalize_dataset(dataset_file, out_file, cols):
 	avg, var = get_avg_and_var(dataset_file)
+	print "hi"
 	with open(dataset_file) as reader:
-		with open(out_file) as writer:
+		with open(out_file, "w") as writer:
 			line = reader.readline()
 			while line:
 				x = np.fromstring(line, dtype='float', sep=' ')
-				normal = (x[cols]-avg[cols])/var[cols]
+				normal = (x[cols]-avg[cols])/(var[cols]**2)
 				writer.write(" ".join(map(str, normal)))
+				line=reader.readline()
 
 def clear_comms(graph):
 	for g in graph:
@@ -153,14 +155,17 @@ def switch_communities(unindexed_graph, commfile):
 		ds = []
 		line = reader.readline()
 		while line:
-			ds.append(line.split(" \n"))
+			ds.append(line.split(" "))
 			line = reader.readline()
 
 	graph = clear_comms(unindexed_graph)
 	count = 0
 	for d in ds:
 		for u in d:
-			unindexed_graph[u].comm.append(count)
+			try:
+				unindexed_graph[u].comm.append(count)
+			except KeyError:
+				pass
 		count+=1
 	return unindexed_graph
 
@@ -289,18 +294,17 @@ import numpy as np
 import time
 
 t=time.time()
-d = load_dict()
+#d = load_dict()
 
 
-#d = test_graph(100)
+d = test_graph(100)
 
-d = switch_communities(d, "commfile.txt")
+#d = switch_communities(d, "commfile.txt")
 
 
 
 print "LOADED: ", time.time()-t
 d=reindex_dict(d)
-print d[927]
 print "INDEXED: ", time.time()-t
 calculate_shortest_paths_to_file(d, "shortest_paths.txt")
 print "SHPS: ", time.time()-t
@@ -308,4 +312,5 @@ calculate_expected_paths_to_file(d, "expected_paths.txt", "shortest_paths.txt")
 print "EXPS: ", time.time()-t
 p.run('graph_to_dataset_file(d,"gowalla_ml_dataset.txt")')
 print "TOFILE: ", time.time()-t
-
+normalize_dataset("gowalla_ml_dataset.txt", "gowalla_ml_dataset_norm.txt", range(5))
+print "NORMALIZED: ", time.time()-t
