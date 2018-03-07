@@ -5,6 +5,7 @@ import sys
 import math
 import numpy as np
 import random
+import cProfile as p
 sys.path.append(os.path.join(os.path.dirname(__file__),'../'))
 
 from core.user import User
@@ -38,7 +39,7 @@ def deg_to_rad(deg):
 EARTH_RAD_KM = 6371.0
 
 def sig1(dist, a=500., t=1000.):
-	return a * np.tanh(1./a*(dist - t))
+	return a * (np.tanh(1./a*(dist - t))+1)
 
 def distance(p0, p1, rad = EARTH_RAD_KM):
 	p0r = (deg_to_rad(p0[0]),deg_to_rad(p0[1]))
@@ -54,14 +55,55 @@ def load_dict():
 	return nodes
 
 
+# def graph_to_dataset_file_xs(graph,filename,shps="shortest_paths.txt",exps="expected_paths.txt"):
+# 	with open(filename,'w') as writer:
+# 		for destination in graph:
+# 			d=graph[destination]
+# 			for neighbor in graph:
+# 				n=graph[neighbor]
+# 				nf = n.friends
+# 				n = graph[neighbor]
+# 				deg = n.deg1
+# 				wdeg = math.log(deg)
+# 				d = graph[destination]
+# 				dist = distance(n.pos,d.pos)
+# 				wdist = sig1(dist)
+# 				cic = len(set(n.comm).intersection(d.comm))
+# 				count = 0
+# 				for _ in nf:
+# 					writer.write("\t".join([str(dist),str(wdist),str(cic),str(deg),str(wdeg)]) + '\n')
+# 					count+=1
+
 
 def graph_to_dataset_file(graph,filename,shps="shortest_paths.txt",exps="expected_paths.txt"):
 	with open(filename,'w') as writer:
-		with open(shps) as shpsr:
-			with open(exps) as expsr:
-				for destination in graph:
-					d=graph[destination]
-					for neighbor in graph:
+		#with open(shps) as shpsr:
+		with open(exps) as expsr:
+			for destination in graph:
+				#print 'hi', time.time()-t
+				#target1_line=shpsr.readline()
+				target2_line=expsr.readline()
+				t1line = np.array(bfs(graph,destination))
+				t2line = np.fromstring(target2_line, float, sep=' ')
+				d=graph[destination]
+				for source in graph:
+					s=graph[source]
+					sf = s.friends
+					temp1=t1line[sf]
+					temp2=t2line[sf]
+					if len(sf)>0:
+						t1 = np.argmin(temp1)
+						t2 = np.argmin(temp2)
+					t1n=0.
+					t2n=0.
+					count = 0
+					for neighbor in sf:
+						t1n=0.
+						t2n=0.
+						if temp1[count] == t1:
+							t1n=1.
+						if temp2[count] == t2:
+							t2n=1.
 						n = graph[neighbor]
 						deg = n.deg1
 						wdeg = math.log(deg)
@@ -69,12 +111,59 @@ def graph_to_dataset_file(graph,filename,shps="shortest_paths.txt",exps="expecte
 						dist = distance(n.pos,d.pos)
 						wdist = sig1(dist)
 						cic = len(set(n.comm).intersection(d.comm))
-						medpower = np.median(map(lambda z: graph[z].deg1, n.friends))
-						nf = n.friends
-						for source in nf:
-							s=graph[source]
-							locality = sum(map(lambda z: distance(graph[z].pos,s.pos), n.friends))
-							writer.write("\t".join([str(dist),str(wdist),str(cic),str(deg),str(wdeg),str(medpower),str(locality),str(t1),str(t2)]) + '\n')
+						#medpower = np.median(map(lambda z: graph[z].deg1, n.friends))
+						#locality = sum(map(lambda z: distance(graph[z].pos,s.pos), n.friends))
+						writer.write("\t".join([str(dist),str(wdist),str(cic),str(deg),str(wdeg),str(t1n),str(t2n)]) + '\n')
+						count+=1
+
+def get_avg_and_var(dataset_file):
+	avg = 0
+	var = 0
+	with open(dataset_file) as reader:
+		line = reader.readline()
+		count=0.
+		while line:
+			x = np.fromstring(line, dtype='float', sep=' ')
+			prev_avg = np.copy(avg)
+			avg += (x-avg)/count
+			var += (x-prev_avg)*(x-avg)
+			line = reader.readline()
+			count += 1
+	return avg, var/(count-1)
+
+
+
+def normalize_dataset(dataset_file, out_file, cols):
+	avg, var = get_avg_and_var(dataset_file)
+	with open(dataset_file) as reader:
+		with open(out_file) as writer:
+			line = reader.readline()
+			while line:
+				x = np.fromstring(line, dtype='float', sep=' ')
+				normal = (x[cols]-avg[cols])/var[cols]
+				writer.write(" ".join(map(str, normal)))
+
+def clear_comms(graph):
+	for g in graph:
+		graph[g].comm = []
+	return graph
+
+def switch_communities(unindexed_graph, commfile):
+	with open(commfile) as reader:
+		ds = []
+		line = reader.readline()
+		while line:
+			ds.append(line.split(" \n"))
+			line = reader.readline()
+
+	graph = clear_comms(unindexed_graph)
+	count = 0
+	for d in ds:
+		for u in d:
+			unindexed_graph[u].comm.append(count)
+		count+=1
+	return unindexed_graph
+
 
 
 # def graph_to_dataset_file1(graph,filename,shps="shortest_paths.txt",exps="expected_paths.txt"):
@@ -190,9 +279,9 @@ def test_graph(n):
 			if i in g[j].friends:
 				friends.append(j)
 		for j in range(i+1,n):
-			if random.random()>.95:
+			if random.random()>.99:
 				friends.append(j)
-		g[i]=User(None,(random.random(),random.random()),[1,2],friends)
+		g[i]=User(None,[1,2],(random.random(),random.random()),friends)
 	return g
 
 import numpy as np
@@ -202,16 +291,21 @@ import time
 t=time.time()
 d = load_dict()
 
-#d=test_graph(100)
+
+#d = test_graph(100)
+
+d = switch_communities(d, "commfile.txt")
+
 
 
 print "LOADED: ", time.time()-t
 d=reindex_dict(d)
+print d[927]
 print "INDEXED: ", time.time()-t
 calculate_shortest_paths_to_file(d, "shortest_paths.txt")
 print "SHPS: ", time.time()-t
 calculate_expected_paths_to_file(d, "expected_paths.txt", "shortest_paths.txt")
 print "EXPS: ", time.time()-t
-graph_to_dataset_file(d,"gowalla_ml_dataset.txt")
+p.run('graph_to_dataset_file(d,"gowalla_ml_dataset.txt")')
 print "TOFILE: ", time.time()-t
 
