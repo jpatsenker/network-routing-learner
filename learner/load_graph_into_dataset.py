@@ -237,7 +237,8 @@ def calculate_shortest_paths_to_file(graph, filename):
 			writer.write(" ".join(map(str, bfs(graph,i))) + "\n")
 
 
-def shps_delegate(graph,writer,r):
+def shps_delegate(graph,writer,r, q):
+	os.system("taskset -p -c %d %d" % q % os.getpid())
 	#print r
 	#c=0
 	for i in range(r[0],r[1]):
@@ -257,8 +258,7 @@ def calculate_shortest_paths_to_file_multi(graph, filename, cores):
 	divs.append(len(graph))
 	ps = []
 	for w in range(len(writers)):
-		os.system("taskset -p -c %d %d" %w % os.getpid())
-		ps.append(Process(target=shps_delegate, args=(graph,writers[w],(divs[w],divs[w+1]))))
+		ps.append(Process(target=shps_delegate, args=(graph,writers[w],(divs[w],divs[w+1]), w)))
 		ps[-1].start()
 
 	with open(filename+'.txt', 'w') as fw:
