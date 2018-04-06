@@ -9,7 +9,7 @@ import cProfile as p
 from multiprocessing import Process
 from multiprocessing import Manager
 sys.path.append(os.path.join(os.path.dirname(__file__),'../'))
-os.system("taskset -c 0-10 -p %d" % os.getpid())
+os.system("taskset -c 0-10 -p 0xff %d" % os.getpid())
 
 from core.user import User
 
