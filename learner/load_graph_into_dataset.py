@@ -245,8 +245,9 @@ def shps_delegate(graph,writer,r, q):
 		#print " ".join(map(str, bfs(graph,i))) + "\n"
 		writer.write(" ".join(map(str, bfs(graph,i))) + "\n")
 		#c+=1
-		if i%500==0:
+		if i%10==0:
 			print "PROCESS", os.getpid(), "HAS COMPLETED", i, "BFSs"
+			sys.stdout.flush()
 	writer.flush()
 	#print c
 
