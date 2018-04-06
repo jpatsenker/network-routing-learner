@@ -245,9 +245,9 @@ def shps_delegate(graph,writer,r, q):
 		#print " ".join(map(str, bfs(graph,i))) + "\n"
 		writer.write(" ".join(map(str, bfs(graph,i))) + "\n")
 		#c+=1
-		if i%10==0:
-			print "PROCESS", os.getpid(), "HAS COMPLETED", i, "BFSs"
-			sys.stdout.flush()
+		# if i%10==0:
+		# 	print "PROCESS", os.getpid(), "HAS COMPLETED", i, "BFSs"
+		# 	sys.stdout.flush()
 	writer.flush()
 	#print c
 
@@ -351,7 +351,7 @@ d = switch_communities(d, "commfile.txt")
 print "LOADED: ", time.time()-t
 d=reindex_dict(d)
 print "INDEXED: ", time.time()-t
-calculate_shortest_paths_to_file_multi(d, "temp/shortest_paths",40)
+calculate_shortest_paths_to_file_multi(d, "temp/shortest_paths",50)
 print "SHPS: ", time.time()-t
 calculate_expected_paths_to_file(d, "temp/expected_paths.txt", "temp/shortest_paths.txt")
 print "EXPS: ", time.time()-t
