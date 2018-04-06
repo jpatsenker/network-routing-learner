@@ -6,6 +6,8 @@ import math
 import numpy as np
 import random
 import cProfile as p
+from multiprocessing import Process
+from multiprocessing import Manager
 sys.path.append(os.path.join(os.path.dirname(__file__),'../'))
 
 from core.user import User
@@ -294,12 +296,12 @@ import numpy as np
 import time
 
 t=time.time()
-#d = load_dict()
+d = load_dict()
 
 
-d = test_graph(100)
+#d = test_graph(100)
 
-#d = switch_communities(d, "commfile.txt")
+d = switch_communities(d, "commfile.txt")
 
 
 
