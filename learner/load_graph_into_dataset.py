@@ -238,7 +238,7 @@ def calculate_shortest_paths_to_file(graph, filename):
 
 
 def shps_delegate(graph,writer,r, q):
-	os.system("taskset -p -c %d %d" % q % os.getpid())
+	os.system("taskset -p -c " + str(q) + " " + str(os.getpid()))
 	#print r
 	#c=0
 	for i in range(r[0],r[1]):
