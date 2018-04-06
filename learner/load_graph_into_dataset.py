@@ -9,7 +9,7 @@ import cProfile as p
 from multiprocessing import Process
 from multiprocessing import Manager
 sys.path.append(os.path.join(os.path.dirname(__file__),'../'))
-os.system("taskset -p -c 0-42 %d" % os.getpid())
+
 
 from core.user import User
 
@@ -257,6 +257,7 @@ def calculate_shortest_paths_to_file_multi(graph, filename, cores):
 	divs.append(len(graph))
 	ps = []
 	for w in range(len(writers)):
+		os.system("taskset -p -c %d %d" %w % os.getpid())
 		ps.append(Process(target=shps_delegate, args=(graph,writers[w],(divs[w],divs[w+1]))))
 		ps[-1].start()
 
