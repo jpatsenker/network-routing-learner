@@ -235,8 +235,46 @@ def calculate_shortest_paths_to_file(graph, filename):
 		for i in graph:
 			writer.write(" ".join(map(str, bfs(graph,i))) + "\n")
 
+
+def shps_delegate(graph,writer,r):
+	#print r
+	#c=0
+	for i in range(r[0],r[1]):
+		#print " ".join(map(str, bfs(graph,i))) + "\n"
+		writer.write(" ".join(map(str, bfs(graph,i))) + "\n")
+		#c+=1
+	writer.flush()
+	#print c
+
+def calculate_shortest_paths_to_file_multi(graph, filename, cores):
+	fnames = [filename+str(q+10)+".txt" for q in range(cores)]
+	writers = [open(filename+str(q+10)+".txt",'w') for q in range(cores)]
+	l = len(graph)
+	divs = range(0,l,int(math.ceil(float(l)/float(cores))))
+	divs.append(len(graph))
+	ps = []
+	for w in range(len(writers)):
+		ps.append(Process(target=shps_delegate, args=(graph,writers[w],(divs[w],divs[w+1]))))
+		ps[-1].start()
+
+	with open(filename+'.txt', 'w') as fw:
+		for i in range(len(ps)):
+			ps[i].join()
+			writers[i].close()
+			with open(fnames[i]) as r:
+				line = r.readline()
+				while line:
+					#print line
+					fw.write(line)
+					line = r.readline()
+
+
+	#os.system('touch '+filename+'.txt')
+	#os.system('ls '+filename+'* | sort | while read fn ; do cat "$fn" >> '+filename+'.txt; done')
+	#os.system("cat "+filename+"* > "+filename+".txt")
+
+
 def calculate_expected_paths_to_files_mult(graph, filename,paths_file):
-	#with open(filename, 'w') as writer:
 	writer = [open('test/'+filename+str(q),'w') for q in range(20)]
 	for i in graph:
 		paths = []
@@ -286,7 +324,7 @@ def test_graph(n):
 			if i in g[j].friends:
 				friends.append(j)
 		for j in range(i+1,n):
-			if random.random()>.99:
+			if random.random()>0.5:
 				friends.append(j)
 		g[i]=User(None,[1,2],(random.random(),random.random()),friends)
 	return g
@@ -308,9 +346,9 @@ d = switch_communities(d, "commfile.txt")
 print "LOADED: ", time.time()-t
 d=reindex_dict(d)
 print "INDEXED: ", time.time()-t
-calculate_shortest_paths_to_file(d, "shortest_paths.txt")
+calculate_shortest_paths_to_file_multi(d, "temp/shortest_paths",40)
 print "SHPS: ", time.time()-t
-calculate_expected_paths_to_file(d, "expected_paths.txt", "shortest_paths.txt")
+calculate_expected_paths_to_file(d, "temp/expected_paths.txt", "temp/shortest_paths.txt")
 print "EXPS: ", time.time()-t
 p.run('graph_to_dataset_file(d,"gowalla_ml_dataset.txt")')
 print "TOFILE: ", time.time()-t
