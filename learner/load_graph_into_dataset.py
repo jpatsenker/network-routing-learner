@@ -9,7 +9,7 @@ import cProfile as p
 from multiprocessing import Process
 from multiprocessing import Manager
 sys.path.append(os.path.join(os.path.dirname(__file__),'../'))
-os.system("taskset -p -c 0-40 %d" % os.getpid())
+os.system("taskset -p -c 0-42 %d" % os.getpid())
 
 from core.user import User
 
@@ -244,6 +244,8 @@ def shps_delegate(graph,writer,r):
 		#print " ".join(map(str, bfs(graph,i))) + "\n"
 		writer.write(" ".join(map(str, bfs(graph,i))) + "\n")
 		#c+=1
+		if i%500==0:
+			print "PROCESS", os.getpid(), "HAS COMPLETED", i, "BFSs"
 	writer.flush()
 	#print c
 
