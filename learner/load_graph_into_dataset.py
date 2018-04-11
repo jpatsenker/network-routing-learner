@@ -278,27 +278,49 @@ def calculate_shortest_paths_to_file_multi(graph, filename, cores):
 	#os.system('ls '+filename+'* | sort | while read fn ; do cat "$fn" >> '+filename+'.txt; done')
 	#os.system("cat "+filename+"* > "+filename+".txt")
 
+#TODO
+def exps_delegate():
+	pass
 
-def calculate_expected_paths_to_files_mult(graph, filename,paths_file):
-	writer = [open('test/'+filename+str(q),'w') for q in range(20)]
-	for i in graph:
-		paths = []
-		paths = read_bfs(paths_file,i)
-		c = 0
-		while c < 10:
-			pathsnew = [0]*len(paths)
-			for s in graph:
-				sgf = graph[s].friends
-				if s == i:
-					pathsnew[s] = 0.
-					continue
-				if i in sgf:
-					pathsnew[s] = 1.
-					continue
-				pathsnew[s] = sum(map(lambda x:paths[x], sgf))*1./len(sgf)+1.
-				paths=copy(pathsnew)
-			writer[c].write("\t".join(map(str, paths)) + "\n")
-			c+=1
+# def nav_readers_to_divs(reader,divs):
+# 	c=1
+# 	lines = map(lambda r: r.readline(), reader)
+# 	while l:
+#
+# 		lines = map(lambda r: r.readline(), reader)
+# 	map(lambda r: r.close(), reader)
+
+def exps_delegate(graph,prev_paths,next_paths,r):
+	for i in range(r[0],r[1]):
+		for s in graph:
+			sfriends = graph[s].friends
+			if s==d:
+				next_paths[i,s] = 0.
+				continue
+			if d in sfriends:
+				next_paths[i,s] = 1.
+				continue
+			next_paths[i,s] = sum(map(lambda f: (prev_paths[f]+1)*1./len(sfriends),sfriends))
+
+
+def calculate_expected_paths_mult(graph, filename,prev_paths,cores):
+	# fnames = [filename+str(q+10)+".txt" for q in range(cores)]
+	# writer = [open(filename+str(q+10)+".txt",'w') for q in range(cores)]
+	# reader = [open(filename+str(q+10)+".txt",'r') for q in range(cores)]
+	l = len(graph)
+	divs = range(0,l,int(math.ceil(float(l)/float(cores))))
+	divs.append(l)
+	#nav_readers_to_divs(reader, divs)
+	c=0
+	while c < 10:
+		ps = []
+		for d in range(len(divs)-1):
+			next_paths = np.copy(prev_paths)
+			ps.append(Process(target = exps_delegate, args = (graph,prev_paths,next_paths,(divs[d],divs[d+1]))))
+		for p in range(len(ps)):
+			p.join()
+		c+=1
+	return next_paths
 
 def calculate_expected_paths_to_file(graph,filename,paths_file):
 	with open(filename,'w') as writer:
@@ -334,7 +356,6 @@ def test_graph(n):
 		g[i]=User(None,[1,2],(random.random(),random.random()),friends)
 	return g
 
-import numpy as np
 
 import time
 
@@ -351,7 +372,7 @@ d = switch_communities(d, "commfile.txt")
 print "LOADED: ", time.time()-t
 d=reindex_dict(d)
 print "INDEXED: ", time.time()-t
-calculate_shortest_paths_to_file_multi(d, "temp/shortest_paths",50)
+#calculate_shortest_paths_to_file_multi(d, "temp/shortest_paths",50)
 print "SHPS: ", time.time()-t
 calculate_expected_paths_to_file(d, "temp/expected_paths.txt", "temp/shortest_paths.txt")
 print "EXPS: ", time.time()-t
