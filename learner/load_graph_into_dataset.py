@@ -119,7 +119,8 @@ def graph_to_dataset_file(graph,filename,shps,exps):
 					writer.write("\t".join([str(dist),str(wdist),str(cic),str(deg),str(wdeg),str(medpower),str(locality),str(t1n),str(t2n)]) + '\n')
 					count+=1
 
-def dataset_delegate(graph,shps,exps,r,writer):
+def dataset_delegate(graph,shps,exps,r,writer,q):
+	os.system("taskset -p -c " + str(q) + " " + str(os.getpid()))
 	sc=0
 	for destination in range(r[0],r[1]):
 		#print(destination)
@@ -163,7 +164,7 @@ def graph_to_dataset_file_multi(graph,filename,shps,exps,cores):
 	divs = list(range(0,l,int(math.ceil(float(l)/float(cores)))))
 	divs.append(len(graph))
 	for w in range(len(writers)):
-		ps.append(Process(target=dataset_delegate, args=(graph,shps,exps,(divs[w],divs[w+1]),writers[w])))
+		ps.append(Process(target=dataset_delegate, args=(graph,shps,exps,(divs[w],divs[w+1]),writers[w],w)))
 		ps[-1].start()
 	for p in range(len(ps)):
 		ps[p].join()
@@ -357,7 +358,7 @@ def calculate_shortest_paths_to_file_multi(graph, filename, cores):
 # 	map(lambda r: r.close(), reader)
 
 def exps_delegate(graph,prev_paths,next_paths,r,q):
-	#os.system("taskset -p -c " + str(q) + " " + str(os.getpid()))
+	os.system("taskset -p -c " + str(q) + " " + str(os.getpid()))
 	for i in range(r[0],r[1]):
 		for s in graph:
 			sfriends = list(graph[s].friends)
