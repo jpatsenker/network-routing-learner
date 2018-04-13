@@ -164,7 +164,7 @@ def graph_to_dataset_file_multi(graph,filename,shps,exps,cores):
 	divs = list(range(0,l,int(math.ceil(float(l)/float(cores)))))
 	divs.append(len(graph))
 	for w in range(len(writers)):
-		ps.append(Process(target=dataset_delegate, args=(graph,shps,exps,(divs[w],divs[w+1]),writers[w],w)))
+		ps.append(Process(target=dataset_delegate, args=(graph,shps,exps,(divs[w],divs[w+1]),writers[w],w+1)))
 		ps[-1].start()
 	for p in range(len(ps)):
 		ps[p].join()
