@@ -384,8 +384,8 @@ def calculate_expected_paths_mult(graph, filename,prev_paths,cores):
 	while c < 10:
 		ps = []
 		q=0
+		next_paths = np.copy(prev_paths)
 		for d in range(len(divs)-1):
-			next_paths = np.copy(prev_paths)
 			ps.append(Process(target = exps_delegate, args = (graph,prev_paths,next_paths,(divs[d],divs[d+1]),q)))
 			ps[-1].start()
 			q+=1
@@ -430,6 +430,33 @@ def test_graph(n):
 	return g
 
 
+# def as_type_delegate(nparr,q,ret):
+# 	os.system("taskset -p -c " + str(q) + " " + str(os.getpid()))
+# 	ret[d] = nparr.astype('int')
+#
+# def as_type_multi(nparr,cores):
+# 	m=Manager()
+# 	l = nparr.shape[0]
+# 	divs = list(range(0,l,int(math.ceil(float(l)/float(cores)))))
+# 	divs.append(l)
+# 	ps=[]
+# 	res=[]
+# 	ret=m.dict()
+# 	for d in range(len(divs)-1):
+# 		ps.append(Process(target=as_type_delegate,args=(nparr[divs[d]:divs[d+1],:],d,ret)))
+# 		ps[-1].start()
+# 	ps[0].join()
+# 	print(ret[0])
+# 	npintarr = ret[0]
+# 	for p in range(1,len(ps)):
+# 		ps[p].join()
+# 		print(ret[p])
+# 		npintarr = np.concatenate([npintarr,ret[p]])
+# 	print(npintarr)
+# 	exit(0)
+# 	return npintarr
+
+
 
 
 
@@ -465,6 +492,8 @@ shps = shps.astype('int')
 print ("SHPS: ", time.time()-t)
 exps=calculate_expected_paths_mult(d, "temp/expected_paths.txt", shps, 50)
 print ("EXPS: ", time.time()-t)
+exps.tofile("temp/expected_paths.txt")
+print ("SAVED: ", time.time()-t)
 graph_to_dataset_file_multi(d,"temp/gowalla_ml_dataset",shps,exps,50)
 print ("TOFILE: ", time.time()-t)
 normalize_dataset("temp/gowalla_ml_dataset.txt", "temp/gowalla_ml_dataset_norm.txt", range(5))
