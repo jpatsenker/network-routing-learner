@@ -14,6 +14,21 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'../'))
 
 from core.user import User
 
+def reindex_dict_depr(nodes):
+	inodes = dict()
+	ndic = dict(zip(range(len(nodes.keys())), nodes.keys()))
+	rev = {v: k for k, v in ndic.items()}
+	for n in range(len(nodes)):
+		inodes[n] = copy(nodes[ndic[n]])
+		inodes[n].uid = n
+	#   if n % 1000 == 0:
+	#       print "Done: ", n
+	for n in inodes:
+		inodes[n].friends = list(map(lambda f: rev[f], inodes[n].friends))
+	#   if n % 1000 == 0:
+	#   	print "Done: ", n
+	return inodes
+
 def reindex_dict(nodes):
 	inodes = dict()
 	ndic = dict(zip(range(len(nodes.keys())), nodes.keys()))
@@ -28,6 +43,7 @@ def reindex_dict(nodes):
 	#   if n % 1000 == 0:
 	#   	print "Done: ", n
 	return inodes
+
 
 def adj_list(graph):
 	al = []
@@ -55,7 +71,7 @@ def distance(p0, p1, rad = EARTH_RAD_KM):
 	return rad*d_sigma
 
 def load_dict():
-	nodes = pickle.load(open('GraphSets/test_graph.pkl','rb'))
+	nodes = pickle.load(open('data/airport_net/airnet.pkl','rb'))
 	return nodes
 
 
@@ -468,16 +484,16 @@ d = load_dict()
 
 #d = test_graph(1000)
 
-d = switch_communities(d, "commfile.txt")
+d = switch_communities(d, "data/airport_net/comms.txt")
 
 
 
 print ("LOADED: ", time.time()-t)
 d=reindex_dict(d)
 print ("INDEXED: ", time.time()-t)
-#calculate_shortest_paths_to_file_multi(d, "temp/shortest_paths",50)
-#shps = pd.io.parsers.read_csv("temp/shortest_paths.txt",sep=' ',header=None,engine='c',dtype='float32').as_matrix()
-shps_str = open("temp/shortest_paths.txt").read()
+calculate_shortest_paths_to_file_multi(d, "data/airport_net/temp/shortest_paths",50)
+#shps = pd.io.parsers.read_csv("data/airport_net/temp/shortest_paths.txt",sep=' ',header=None,engine='c',dtype='float32').as_matrix()
+shps_str = open("data/airport_net/temp/shortest_paths.txt").read()
 print ("READ SHPS: ", time.time()-t)
 sys.stdout.flush()
 shps_arr = shps_str.split("\n")
@@ -496,14 +512,14 @@ sys.stdout.flush()
 shps = shps.astype('int')
 print ("SHPS: ", time.time()-t)
 sys.stdout.flush()
-exps=calculate_expected_paths_mult(d, "temp/expected_paths.txt", shps, 50)
+exps=calculate_expected_paths_mult(d, "data/airport_net/temp/expected_paths.txt", shps, 50)
 print ("EXPS: ", time.time()-t)
 sys.stdout.flush()
-exps.tofile("temp/expected_paths.txt")
+exps.tofile("data/airport_net/temp/expected_paths.txt")
 print ("SAVED: ", time.time()-t)
 sys.stdout.flush()
-graph_to_dataset_file_multi(d,"temp/gowalla_ml_dataset",shps,exps,50)
+graph_to_dataset_file_multi(d,"data/airport_net/dataset/airport_ds",shps,exps,50)
 print ("TOFILE: ", time.time()-t)
 sys.stdout.flush()
-normalize_dataset("temp/gowalla_ml_dataset.txt", "temp/gowalla_ml_dataset_norm.txt", range(5))
+normalize_dataset("data/airport_net/dataset/airport_ds.txt", "data/airport_net/dataset/airport_ds_norm.txt", range(5))
 print ("NORMALIZED: ", time.time()-t)
