@@ -1,9 +1,9 @@
 from copy import copy
 import pandas as pd
 import numpy as np
+import os, sys
+sys.path.insert(0, os.getcwd())
 from core.user import User
-import os
-os.chdir(str(os.getcwd()) + "../../")
 
 a=pd.read_csv("data/airport_net/airports.dat")
 airmat=a.as_matrix()
