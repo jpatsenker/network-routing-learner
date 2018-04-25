@@ -50,11 +50,16 @@ def get_norm_points(file):
 	for i in range(50):
 		with open(file + str(i) + ".txt") as f:
 			line = f.readline()
+			c=0
 			while line:
 				line_np =np.fromstring(line, dtype=float, sep=' ')
 				top = np.maximum(top,line_np[:-2])
 				bottom = np.minimum(bottom, line_np[:-2])
 				line = f.readline()
+				c+=1
+				if c%10000 == 0:
+					print c
+		print "next"
 	np.savetxt("top.txt", top)
 	np.savetxt("bottom.txt", bottom)
 
