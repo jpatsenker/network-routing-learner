@@ -10,7 +10,6 @@ gen
 #Mac
 .DS_Store
 
-Data/*
 GraphSets/full_random/*
 GraphSets/plots/*
 GraphSets/nodes_data_dictionary.pkl
