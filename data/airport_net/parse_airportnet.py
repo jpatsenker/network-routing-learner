@@ -33,5 +33,6 @@ for i in range(len(good_ids)):
 		print(i)
 
 import pickle
+
 with open('data/airport_net/airnet.pkl','wb') as w:
 	pickle.dump(an,w)
