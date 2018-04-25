@@ -47,7 +47,7 @@ def get_norm_points(file):
 	splits=[0]
 	top = 0
 	bottom = 0
-	for i in range(50,51):
+	for i in range(50):
 		with open(file + str(i) + ".txt") as f:
 			line = f.readline()
 			while line:
