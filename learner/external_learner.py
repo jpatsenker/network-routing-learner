@@ -4,7 +4,7 @@ import cProfile
 from multiprocessing import Process
 from multiprocessing import Manager
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 def get_split_points(file,num_pts):
@@ -22,46 +22,151 @@ def get_split_points(file,num_pts):
 			line = f.readline()
 	return splits
 
-def delegate_cross_entropy_error_from_file(w, f, lim, ret, pnum):
-	se=0
-	sg=0
-	sh=0
+def get_norms(file_n):
+
+
+def get_split_norm_points(file,num_pts):
+	splits=[0]
+	top = 0
+	bottom = 0
+	c=0
+	i=0
+	with open(file) as f:
+		line = f.readline()
+		while line:
+			c+=len(line)
+			i+=1
+			line_np =np.fromstring(line, dtype=float, sep=' ')
+			top = np.maximum(top,line_np[:-2])
+			bottom = np.minimum(bottom, line_np[:-2])
+			if i==num_pts:
+				splits.append(c)
+				i=0
+			line = f.readline()
+	return splits, top, bottom
+
+def get_norm_points(file):
+	splits=[0]
+	top = 0
+	bottom = 0
+	for i in range(51,52):
+		with open(file + str(i) + ".txt") as f:
+			line = f.readline()
+			while line:
+				line_np =np.fromstring(line, dtype=float, sep=' ')
+				top = np.maximum(top,line_np[:-2])
+				bottom = np.minimum(bottom, line_np[:-2])
+				line = f.readline()
+	np.savetxt("top.txt", top)
+	np.savetxt("bottom.txt", bottom)
+
+
+
+def delegate_cross_entropy_error_from_file(w1, w2, f, lim, ret, pnum,top,bottom):
+	se1=0
+	sg1=0
+	sh1=0
+	se2=0
+	sg2=0
+	sh2=0
 	count=0
 	line=f.readline()
 	while count<lim and line:
 		count+=1.
 		line=np.fromstring(line,dtype=float,sep=' ')
-		x=line[:-1]
-		y=line[-1]
-		exppart=np.e**(y*np.dot(w,x))
-		part2 = -y/(1.+exppart)
+		x=(line[:-2]-bottom)/top
+		y1=(line[-2]-0.5)*2.
+		y2=(line[-1]-0.5)*2.
+		exppart_1=np.e**(y1*np.dot(w1,x))
+		exppart_2=np.e**(y2*np.dot(w2,x))
+		part2_1 = -y1/(1.+exppart_1)
+		part2_2 = -y2/(1.+exppart_2)
 		invc=1./count
-		se += (np.log(1. + 1./exppart)-se)*invc
-		sg += (x*part2-sg)*invc
-		sh += (-part2**2*np.outer(x,x)*exppart-sh)*invc
+		se1 += (np.log(1. + 1./exppart_1)-se1)*invc
+		sg1 += (x*part2_1-sg1)*invc
+		sh1 += (-part2_1**2*np.outer(x,x)*exppart_1-sh1)*invc
+		se2 += (np.log(1. + 1./exppart_2)-se2)*invc
+		sg2 += (x*part2_2-sg2)*invc
+		sh2 += (-part2_2**2*np.outer(x,x)*exppart_2-sh2)*invc
 		line=f.readline()
-	ret[pnum]=[se, sg, sh]
+	ret[pnum]=[se1, sg1, sh1, se2, sg2, sh2]
 
-def cross_entropy_error_from_file_multithreaded(w, data, splits,pnum):
-	se = [0]*(len(splits)-1)
-	sg = [0]*(len(splits)-1)
-	sh = [0]*(len(splits)-1)
+def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bottom):
+	se1=0
+	sg1=0
+	sh1=0
+	se2=0
+	sg2=0
+	sh2=0
+	count=0
+	line=f.readline()
+	while line:
+		count+=1.
+		line=np.fromstring(line,dtype=float,sep=' ')
+		x=(line[:-2]-bottom)/top
+		y1=(line[-2]-0.5)*2.
+		y2=(line[-1]-0.5)*2.
+		exppart_1=np.e**(y1*np.dot(w1,x))
+		exppart_2=np.e**(y2*np.dot(w2,x))
+		part2_1 = -y1/(1.+exppart_1)
+		part2_2 = -y2/(1.+exppart_2)
+		invc=1./count
+		se1 += (np.log(1. + 1./exppart_1)-se1)*invc
+		sg1 += (x*part2_1-sg1)*invc
+		sh1 += (-part2_1**2*np.outer(x,x)*exppart_1-sh1)*invc
+		se2 += (np.log(1. + 1./exppart_2)-se2)*invc
+		sg2 += (x*part2_2-sg2)*invc
+		sh2 += (-part2_2**2*np.outer(x,x)*exppart_2-sh2)*invc
+		line=f.readline()
+	ret[pnum]=[se1, sg1, sh1, se2, sg2, sh2]
+
+def cross_entropy_error_from_file_multithreaded(w1, w2, data, splits,pnum,top,bottom):
+	se1 = [0]*(len(splits)-1)
+	sg1 = [0]*(len(splits)-1)
+	sh1 = [0]*(len(splits)-1)
+	se2 = [0]*(len(splits)-1)
+	sg2 = [0]*(len(splits)-1)
+	sh2 = [0]*(len(splits)-1)
 	m = Manager()
-	ret = m.list([[0,0,0]]*(len(splits)-1))
+	ret = m.list([[0,0,0,0,0,0]]*(len(splits)-1))
 	ps = []
 	fs = [open(data, "r") for i in range(len(splits)-1)]
 	cores=len(splits)-1
 	for i in range(1,len(splits)):
 		fs[i-1].seek(splits[i-1])
-		p=Process(target=delegate_cross_entropy_error_from_file, args=(w, fs[i-1], pnum, ret,i-1))
+		p=Process(target=delegate_cross_entropy_error_from_file, args=(w1, w2, fs[i-1], pnum, ret,i-1,top,bottom))
 		ps.append(p)
 		p.start()
 
 	for i in range(len(ps)):
 		ps[i].join()
-		se[i], sg[i], sh[i] = ret[i]
+		se1[i], sg1[i], sh1[i], se2[i], sg2[i], sh2[i] = ret[i]
 
-	return 1./cores * sum(se), 1./cores * sum(sg), 1./cores * sum(sh)
+	return 1./cores * sum(se1), 1./cores * sum(sg1), 1./cores * sum(sh1), 1./cores * sum(se2), 1./cores * sum(sg2), 1./cores * sum(sh2)
+
+def cross_entropy_error_from_multifile_multithreaded(w1, w2, data, splits,pnum,top,bottom):
+	se1 = [0]*(len(splits)-1)
+	sg1 = [0]*(len(splits)-1)
+	sh1 = [0]*(len(splits)-1)
+	se2 = [0]*(len(splits)-1)
+	sg2 = [0]*(len(splits)-1)
+	sh2 = [0]*(len(splits)-1)
+	m = Manager()
+	ret = m.list([[0,0,0,0,0,0]]*(len(splits)-1))
+	ps = []
+	fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
+	cores=50
+	for i in range(50):
+		#fs[i-1].seek(splits[i-1])
+		p=Process(target=delegate_cross_entropy_error_from_multiple_files, args=(w1, w2, pnum, ret,i-1,top,bottom))
+		ps.append(p)
+		p.start()
+
+	for i in range(len(ps)):
+		ps[i].join()
+		se1[i], sg1[i], sh1[i], se2[i], sg2[i], sh2[i] = ret[i]
+
+	return 1./cores * sum(se1), 1./cores * sum(sg1), 1./cores * sum(sh1), 1./cores * sum(se2), 1./cores * sum(sg2), 1./cores * sum(sh2)
 
 def cross_entropy_error_from_file(w, data):
 	se = 0
@@ -183,32 +288,90 @@ def lm_opt_onepass(w, f, data, conv):
 		print "Iter complete with ", eta, time.time()-t
 	return w
 
-def delegateRegress(f,numpoints,ret,pnum):
+def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump.txt"):
+	eta1 = 1.
+	eta2 = 1.
+	fn1=10000000.
+	fp1=0.
+	fn2=10000000.
+	fp2=0.
+	c=0
+	while l2norm(fn1-fp1)>conv and l2norm(fn2-fp2)>conv:
+		t=time.time()
+		fp1 = np.copy(fn1)
+		fp2 = np.copy(fn2)
+		fn1, grad1, hess1, fn2, grad2, hess2 = f(w1,w2,data)
+		if fp1 < fn1:
+			eta1 *= 10.
+		else:
+			eta1 *= .1
+		if fp2 < fn2:
+			eta2 *= 10.
+		else:
+			eta2 *= .1
+		#print hess1.shape, grad1.shape, eta1, w1.shape
+		w1 += np.dot(np.linalg.pinv(hess1 - eta1*np.identity(w1.shape[0])),grad1)
+		w2 += np.dot(np.linalg.pinv(hess2 - eta2*np.identity(w2.shape[0])),grad2)
+		c+=1
+		with open(fil, 'a') as wrtr:
+			wrtr.write("Iteration " + str(c) + " Complete with " + str(eta1) + " " + str(eta2) + "\n")
+			wrtr.write(str(w1) + "\n" + str(w2) + "\n")
+		print "Iter complete with ", eta1, eta2, time.time()-t
+	return w1, w2
+
+def delegateRegress(f,numpoints,ret,pnum,top,bottom):
 	print numpoints
 	line=f.readline()
 	xtx=0.
-	xty=0.
+	xty1=0.
+	xty2=0.
 	c=0
 	while line and c<numpoints:
 		d=np.fromstring(line, dtype=float, sep=' ')
-		x=d[:-1]
-		y=d[-1]
+		x=(d[:-2]-bottom)/top
+		y1=2.*(d[-2]-0.5)
+		y2=2.*(d[-1]-0.5)
 		xtx+=np.outer(x,x)
-		xty+=int(y)*x
+		xty1+=int(y1)*x
+		xty2+=int(y2)*x
 		f.readline()
 		c+=1
 #		if c%100==0:
 #			print c
 	print "p done", pnum
-	ret[pnum]=[xtx,xty]
+	print xtx, xty1, xty2
+	ret[pnum]=[xtx,xty1,xty2]
+
+def delegateRegressFullFile(f,ret,pnum,top,bottom):
+	line=f.readline()
+	xtx=0.
+	xty1=0.
+	xty2=0.
+	c=0
+	while line:
+		d=np.fromstring(line, dtype=float, sep=' ')
+		x=(d[:-2]-bottom)/top
+		y1=2.*(d[-2]-0.5)
+		y2=2.*(d[-1]-0.5)
+		xtx+=np.outer(x,x)
+		xty1+=int(y1)*x
+		xty2+=int(y2)*x
+		f.readline()
+		c+=1
+#		if c%100==0:
+#			print c
+	print "p done", pnum
+	ret[pnum]=[xtx,xty1,xty2]
 
 
 class ExternalRegressor:
 
 	def __init__(self):
 		self.xtx = 0
-		self.xty = 0
-		self.w = 0
+		self.xty1 = 0
+		self.xty2 = 0
+		self.w1 = 0
+		self.w2 = 0
 
 	def addPoint(self, x, y):
 		"""
@@ -217,7 +380,8 @@ class ExternalRegressor:
 		:param y: label
 		"""
 		self.xtx += np.outer(x,x)
-		self.xty += int(y)*x
+		self.xty1 += int(y)*x
+		self.xty2 += int(y)*x
 
 	def classify(self,x):
 		if np.dot(self.w, x) >= 0:
@@ -225,8 +389,9 @@ class ExternalRegressor:
 		return -1.
 
 	def final(self):
-		self.w = np.dot(np.linalg.pinv(self.xtx),self.xty)
-		return self.w
+		self.w1 = np.dot(np.linalg.pinv(self.xtx),self.xty1)
+		self.w2 = np.dot(np.linalg.pinv(self.xtx),self.xty2)
+		return self.w1, self.w2
 
 	def regressFromFile(self,data):
 		with open(data) as f:
@@ -237,35 +402,62 @@ class ExternalRegressor:
 				line=f.readline()
 		return self.final()
 
-	def regressFromFileMultithreaded(self,data,splits,num_points):
+	def regressFromFileMultithreaded(self,data,splits,num_points,top,bottom):
 		xtx = [0]*(len(splits)-1)
-		xty = [0]*(len(splits)-1)
+		xty1 = [0]*(len(splits)-1)
+		xty2 = [0]*(len(splits)-1)
 		m = Manager()
-		ret = m.list([[0,0]]*(len(splits)-1))
+		ret = m.list([[0,0,0]]*(len(splits)-1))
 		ps = []
 		fs = [open(data, "r") for i in range(len(splits)-1)]
 		cores=len(splits)-1
 		for i in range(1,len(splits)):
 			fs[i-1].seek(splits[i-1])
-			p=Process(target=delegateRegress, args=(fs[i-1], num_points, ret,i-1))
+			p=Process(target=delegateRegress, args=(fs[i-1], num_points, ret,i-1,top,bottom))
 			ps.append(p)
 			p.start()
 			print "start", p
 		for i in range(len(ps)):
 			ps[i].join()
-			xtx[i], xty[i] = ret[i]
+			xtx[i], xty1[i], xty2[i] = ret[i]
 		self.xtx=np.sum(xtx,axis=0)
-		self.xty=np.sum(xty,axis=0)
+		self.xty1=np.sum(xty1,axis=0)
+		self.xty2=np.sum(xty2,axis=0)
+		return self.final()
+
+	def regressFromFileMultithreadedMultifile(self,data,,top,bottom):
+		xtx = [0]*50
+		xty1 = [0]*50
+		xty2 = [0]*50
+		m = Manager()
+		ret = m.list([[0,0,0]]*(len(splits)-1))
+		ps = []
+		fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
+		cores=50
+		for i in range(1,len(splits)):
+			fs[i-1].seek(splits[i-1])
+			p=Process(target=delegateRegress, args=(fs[i-1], ret,i-1,top,bottom))
+			ps.append(p)
+			p.start()
+			print "start", p
+		for i in range(len(ps)):
+			ps[i].join()
+			xtx[i], xty1[i], xty2[i] = ret[i]
+		self.xtx=np.sum(xtx,axis=0)
+		self.xty1=np.sum(xty1,axis=0)
+		self.xty2=np.sum(xty2,axis=0)
 		return self.final()
 
 class ExternalLogisticRegressor:
 
 	def __init__(self):
 		self.init_reg = ExternalRegressor()
-		self.w = 0
+		self.w1 = 0
+		self.w2 = 0
 
-	def classify(self,x):
-		if np.dot(self.w, x)>=0:
+
+	def classify(self,x,w):
+		if np.dot(w, x)>=0:
 			return 1.
 		return -1.
 
@@ -273,20 +465,37 @@ class ExternalLogisticRegressor:
 		t=time.time()
 		ws = self.init_reg.regressFromFile(data)
 		print "Lin Reg complete", time.time()-t
-		self.w = lm_opt_onepass(ws,cross_entropy_error_from_file,data, 0.1)
-		return self.w
+		self.w1,self.w2 = lm_opt_onepass(ws,cross_entropy_error_from_file,data, 0.1)
+		return self.w1, self.w2
 
-	def regressFromFileMultithreaded(self,data):
+	def regressFromFileMultithreaded(self,data,fil="temp_dump.txt"):
 		t=time.time()
-		NPTS=4622000
+		NPTS=527306
 		NDIV=2
-		splits = get_split_points(data, NPTS/NDIV)
+		splits,top,bottom = get_split_norm_points(data, NPTS/NDIV)
+		#top,bottom = get_norms(data)
 		print "splits calc: ", time.time()-t
 		t=time.time()
-		ws = self.init_reg.regressFromFileMultithreaded(data,splits,NPTS/NDIV)
+		ws1,ws2 = self.init_reg.regressFromFileMultithreaded(data,splits,NPTS/NDIV,top,bottom)
+		with open(fil, 'a') as wrtr:
+			wrtr.write("Lin Regression Weights\n")
+			wrtr.write(str(ws1) + "\n" + str(ws2) + "\n")
 		print "Lin Reg complete", time.time()-t
-		self.w = lm_opt_onepass(ws,(lambda wi, datai: cross_entropy_error_from_file_multithreaded(wi, datai, splits,NPTS/NDIV)),data, 0.01)
-		return self.w
+		self.w1, self.w2 = lm_opt_onepass_2targ(ws1, ws2, (lambda wi1, wi2, datai: cross_entropy_error_from_file_multithreaded(wi1, wi2, datai, splits,NPTS/NDIV,top,bottom)),data, 0.01)
+		return self.w1, self.w2
+
+	def regressFromFileMultithreadedMultiFile(self,data,fil="temp_dump.txt"):
+		t=time.time()
+		top,bottom = get_norms(data)
+		print "splits calc: ", time.time()-t
+		t=time.time()
+		ws1,ws2 = self.init_reg.regressFromFileMultithreadedMultifile(data,top,bottom)
+		with open(fil, 'a') as wrtr:
+			wrtr.write("Lin Regression Weights\n")
+			wrtr.write(str(ws1) + "\n" + str(ws2) + "\n")
+		print "Lin Reg complete", time.time()-t
+		self.w1, self.w2 = lm_opt_onepass_2targ(ws1, ws2, (lambda wi1, wi2, datai: cross_entropy_error_from_file_multithreaded(wi1, wi2, datai, splits,NPTS/NDIV,top,bottom)),data, 0.01)
+		return self.w1, self.w2
 
 
 def calculate_class_error(Xs,ys,cfunc):
@@ -314,9 +523,10 @@ def long_lin_regressor_unit_test():
 	ws = er.regressFromFileMultithreaded("big_dat.txt")
 
 def run():
+	open("temp_dump.txt", 'w').close()
 	er = ExternalLogisticRegressor()
 
-	ws = er.regressFromFileMultithreaded("gowalla_ml_dataset.txt")
+	ws = er.regressFromFileMultithreaded("temp/gowalla_ml_dataset")
 
 
 def easy_lin_regressor_unit_test():
@@ -352,4 +562,5 @@ def easy_lin_regressor_unit_test():
 
 
 #cProfile.run("easy_lin_regressor_unit_test()")
-cProfile.run("run()")
+#cProfile.run("run()")
+get_norms()
