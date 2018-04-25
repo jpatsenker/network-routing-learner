@@ -563,4 +563,4 @@ def easy_lin_regressor_unit_test():
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-get_norms()
+get_norms("temp/gowalla_ml_dataset")
