@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import sys
 import cProfile
 from multiprocessing import Process
 from multiprocessing import Manager
@@ -50,12 +51,18 @@ def get_norm_points(file):
 	for i in range(50):
 		with open(file + str(i) + ".txt") as f:
 			line = f.readline()
+			c=0
 			while line:
 				line_np =np.fromstring(line, dtype=float, sep=' ')
 				top = np.maximum(top,line_np[:-2])
 				bottom = np.minimum(bottom, line_np[:-2])
 				line = f.readline()
+				c+=1
+				if c%1000000==0:
+					print c
+				sys.stdout.flush()
 		print "next"
+		sys.stdout.flush()
 	np.savetxt("top.txt", top)
 	np.savetxt("bottom.txt", bottom)
 
