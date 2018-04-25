@@ -22,8 +22,6 @@ def get_split_points(file,num_pts):
 			line = f.readline()
 	return splits
 
-def get_norms(file_n):
-
 
 def get_split_norm_points(file,num_pts):
 	splits=[0]
