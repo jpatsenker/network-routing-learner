@@ -2,6 +2,8 @@ from copy import copy
 import pandas as pd
 import numpy as np
 from core.user import User
+import os
+os.chdir("../../")
 
 a=pd.read_csv("data/airport_net/airports.dat")
 airmat=a.as_matrix()
