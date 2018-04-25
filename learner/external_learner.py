@@ -423,7 +423,7 @@ class ExternalRegressor:
 		self.xty2=np.sum(xty2,axis=0)
 		return self.final()
 
-	def regressFromFileMultithreadedMultifile(self,data,,top,bottom):
+	def regressFromFileMultithreadedMultifile(self,data,top,bottom):
 		xtx = [0]*50
 		xty1 = [0]*50
 		xty2 = [0]*50
@@ -561,4 +561,4 @@ def easy_lin_regressor_unit_test():
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-get_norms("temp/gowalla_ml_dataset")
+get_norm_points("temp/gowalla_ml_dataset")
