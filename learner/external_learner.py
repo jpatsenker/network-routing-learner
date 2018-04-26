@@ -40,10 +40,9 @@ def get_split_norm_points(file,num_pts):
 			bottom = np.minimum(bottom, line_np[:-2])
 			if i==num_pts:
 				splits.append(c)
-				i=0
-			if c%100000==0:
-				print c, time.time()
+				print i, time.time()
 				sys.stdout.flush()
+				i=0
 			line = f.readline()
 	return splits, top, bottom
 
