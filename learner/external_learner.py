@@ -442,7 +442,7 @@ class ExternalRegressor:
 		fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
 		cores=50
 		for i in range(50):
-			p=Process(target=delegateRegress, args=(fs[i], ret,i,top,bottom))
+			p=Process(target=delegateRegressFullFile, args=(fs[i], ret,i,top,bottom))
 			ps.append(p)
 			p.start()
 			print "start", p
