@@ -109,6 +109,8 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 	count=0
 	line=f.readline()
 	while line:
+		if count%10000==0:
+			print "hi"
 		count+=1.
 		line=np.fromstring(line,dtype=float,sep=' ')
 		x=(line[:-2]-bottom)/top
