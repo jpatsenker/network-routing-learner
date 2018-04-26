@@ -295,7 +295,7 @@ def lm_opt_onepass(w, f, data, conv):
 		print "Iter complete with ", eta, time.time()-t
 	return w
 
-def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump.txt"):
+def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump_airnet.txt"):
 	eta1 = 1.
 	eta2 = 1.
 	fn1=10000000.
