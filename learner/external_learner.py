@@ -575,4 +575,4 @@ def easy_lin_regressor_unit_test():
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-get_norm_points("data/airport_net/dataset/airport_ds.txt")
+print get_split_norm_points("data/airport_net/dataset/airport_ds.txt")
