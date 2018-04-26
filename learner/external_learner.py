@@ -41,8 +41,8 @@ def get_split_norm_points(file,num_pts):
 			if i==num_pts:
 				splits.append(c)
 				i=0
-			if c%1000000==0:
-				print c
+			if c%100000==0:
+				print c, time.time()
 			line = f.readline()
 	return splits, top, bottom
 
