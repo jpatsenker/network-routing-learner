@@ -437,11 +437,11 @@ class ExternalRegressor:
 		xty1 = [0]*50
 		xty2 = [0]*50
 		m = Manager()
-		ret = m.list([[0,0,0]]*(len(splits)-1))
+		ret = m.list([[0,0,0]]*50)
 		ps = []
 		fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
 		cores=50
-		for i in range(1,len(splits)):
+		for i in range(50):
 			fs[i-1].seek(splits[i-1])
 			p=Process(target=delegateRegress, args=(fs[i-1], ret,i-1,top,bottom))
 			ps.append(p)
@@ -576,5 +576,5 @@ def run_airport():
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-run()
+run_airport()()
 #print get_split_norm_points("data/airport_net/dataset/airport_ds.txt", 212468368./50.)
