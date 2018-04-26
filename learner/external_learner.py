@@ -528,11 +528,17 @@ def long_lin_regressor_unit_test():
 
 	ws = er.regressFromFileMultithreaded("big_dat.txt")
 
-def run():
+def run_gowalla():
 	open("temp_dump.txt", 'w').close()
 	er = ExternalLogisticRegressor()
 
 	ws = er.regressFromFileMultithreaded("temp/gowalla_ml_dataset")
+
+def run_airport():
+	open("temp_dump_airnet.txt", 'w').close()
+	er = ExternalLogisticRegressor()
+
+	ws = er.regressFromFileMultithreaded("data/airport_net/dataset/airport_ds.txt")
 
 
 def easy_lin_regressor_unit_test():
@@ -569,4 +575,4 @@ def easy_lin_regressor_unit_test():
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-get_norm_points("temp/gowalla_ml_dataset")
+get_norm_points("data/airport_net/dataset/airport_ds.txt")
