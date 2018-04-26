@@ -109,7 +109,7 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 	count=0
 	line=f.readline()
 	while line:
-		if count%10000==0:
+		if count%100==0:
 			print "hi"
 			sys.stdout.flush()
 		count+=1.
