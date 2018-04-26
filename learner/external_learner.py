@@ -43,6 +43,7 @@ def get_split_norm_points(file,num_pts):
 				i=0
 			if c%100000==0:
 				print c, time.time()
+				sys.stdout.flush()
 			line = f.readline()
 	return splits, top, bottom
 
@@ -62,7 +63,7 @@ def get_norm_points(file):
 				c+=1
 				if c%1000000==0:
 					print c
-				sys.stdout.flush()
+					sys.stdout.flush()
 		print "next"
 		sys.stdout.flush()
 	np.savetxt("top.txt", top)
