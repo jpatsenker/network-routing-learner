@@ -39,6 +39,7 @@ def get_split_norm_points(file,num_pts):
 			top = np.maximum(top,line_np[:-2])
 			bottom = np.minimum(bottom, line_np[:-2])
 			if i==num_pts:
+				print 'hi'
 				splits.append(c)
 				print i, time.time()
 				sys.stdout.flush()
@@ -577,4 +578,4 @@ def easy_lin_regressor_unit_test():
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-print get_split_norm_points("data/airport_net/dataset/airport_ds.txt", 212468368./50.)
+print get_split_norm_points("data/airport_net/dataset/airport_ds.txt", 10)
