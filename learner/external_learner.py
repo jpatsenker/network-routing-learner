@@ -39,7 +39,6 @@ def get_split_norm_points(file,num_pts):
 			top = np.maximum(top,line_np[:-2])
 			bottom = np.minimum(bottom, line_np[:-2])
 			if i==num_pts:
-				print 'hi'
 				splits.append(c)
 				print i, time.time()
 				sys.stdout.flush()
@@ -166,8 +165,7 @@ def cross_entropy_error_from_multifile_multithreaded(w1, w2, data, splits,pnum,t
 	fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
 	cores=50
 	for i in range(50):
-		#fs[i-1].seek(splits[i-1])
-		p=Process(target=delegate_cross_entropy_error_from_multiple_files, args=(w1, w2, pnum, ret,i-1,top,bottom))
+		p=Process(target=delegate_cross_entropy_error_from_multiple_files, args=(w1, w2, fs[i], i, ret,i-1,top,bottom))
 		ps.append(p)
 		p.start()
 
@@ -464,7 +462,6 @@ class ExternalLogisticRegressor:
 		self.w1 = 0
 		self.w2 = 0
 
-
 	def classify(self,x,w):
 		if np.dot(w, x)>=0:
 			return 1.
@@ -493,9 +490,10 @@ class ExternalLogisticRegressor:
 		self.w1, self.w2 = lm_opt_onepass_2targ(ws1, ws2, (lambda wi1, wi2, datai: cross_entropy_error_from_file_multithreaded(wi1, wi2, datai, splits,NPTS/NDIV,top,bottom)),data, 0.01)
 		return self.w1, self.w2
 
-	def regressFromFileMultithreadedMultiFile(self,data,fil="temp_dump.txt"):
+	def regressFromFileMultithreadedMultiFile(self,data,fil="temp_dump_airnet.txt"):
 		t=time.time()
-		top,bottom = get_norms(data)
+		#top,bottom = get_norm_points(data)
+		top,bottom=np.array([2.00092774e+04,   1.00000000e+03,   1.00000000e+00, 9.15000000e+02,   6.81892407e+00,   9.15000000e+02, 1.23771376e+07]), np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.])
 		print "splits calc: ", time.time()-t
 		t=time.time()
 		ws1,ws2 = self.init_reg.regressFromFileMultithreadedMultifile(data,top,bottom)
@@ -503,7 +501,7 @@ class ExternalLogisticRegressor:
 			wrtr.write("Lin Regression Weights\n")
 			wrtr.write(str(ws1) + "\n" + str(ws2) + "\n")
 		print "Lin Reg complete", time.time()-t
-		self.w1, self.w2 = lm_opt_onepass_2targ(ws1, ws2, (lambda wi1, wi2, datai: cross_entropy_error_from_file_multithreaded(wi1, wi2, datai, splits,NPTS/NDIV,top,bottom)),data, 0.01)
+		self.w1, self.w2 = lm_opt_onepass_2targ(ws1, ws2, (lambda wi1, wi2, datai: cross_entropy_error_from_multifile_multithreaded(wi1, wi2, datai,top,bottom)),data, 0.01)
 		return self.w1, self.w2
 
 
@@ -541,41 +539,42 @@ def run_airport():
 	open("temp_dump_airnet.txt", 'w').close()
 	er = ExternalLogisticRegressor()
 
-	ws = er.regressFromFileMultithreaded("data/airport_net/dataset/airport_ds.txt")
+	ws = er.regressFromFileMultithreadedMultiFile("data/airport_net/dataset/airport_ds")
 
 
-def easy_lin_regressor_unit_test():
-	er = ExternalLogisticRegressor()
-
-	ws = er.regressFromFileMultithreaded("rand_data_head.txt")
-	#ws= er.regressFromFile("../../rand_xs.txt", "../../rand_ys.txt")
-
-	dat = np.loadtxt("rand_data_head.txt")
-	Xs = dat[:,:-1]
-	ys = dat[:,-1]
-
-	pca = PCA(11)
-
-	Zs = pca.fit_transform(Xs)
-
-	print ws
-
-	plt.scatter(Zs[:,0], Zs[:,1], c=ys)
-
-	zws = pca.transform([ws])
-
-	delta = 0.025
-	xsp = np.arange(-1.0, 1.0, delta)
-	ysp = np.arange(-1.0, 1.0, delta)
-	Xsp, Ysp = np.meshgrid(xsp, ysp)
-	Zsp = zws[0,0]*Xsp + zws[0,1]*Ysp
-
-	plt.contour(Xsp, Ysp, Zsp, [0])
-
-	plt.show()
-	#print calculate_class_error_from_file(Xs, ys, lambda x: er.classify(x))
+# def easy_lin_regressor_unit_test():
+# 	er = ExternalLogisticRegressor()
+#
+# 	ws = er.regressFromFileMultithreaded("rand_data_head.txt")
+# 	#ws= er.regressFromFile("../../rand_xs.txt", "../../rand_ys.txt")
+#
+# 	dat = np.loadtxt("rand_data_head.txt")
+# 	Xs = dat[:,:-1]
+# 	ys = dat[:,-1]
+#
+# 	pca = PCA(11)
+#
+# 	Zs = pca.fit_transform(Xs)
+#
+# 	print ws
+#
+# 	plt.scatter(Zs[:,0], Zs[:,1], c=ys)
+#
+# 	zws = pca.transform([ws])
+#
+# 	delta = 0.025
+# 	xsp = np.arange(-1.0, 1.0, delta)
+# 	ysp = np.arange(-1.0, 1.0, delta)
+# 	Xsp, Ysp = np.meshgrid(xsp, ysp)
+# 	Zsp = zws[0,0]*Xsp + zws[0,1]*Ysp
+#
+# 	plt.contour(Xsp, Ysp, Zsp, [0])
+#
+# 	plt.show()
+# 	#print calculate_class_error_from_file(Xs, ys, lambda x: er.classify(x))
 
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-print get_split_norm_points("data/airport_net/dataset/airport_ds.txt", 100000)
+run()
+#print get_split_norm_points("data/airport_net/dataset/airport_ds.txt", 212468368./50.)
