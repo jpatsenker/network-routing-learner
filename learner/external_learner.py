@@ -199,7 +199,7 @@ def cross_entropy_error_from_file(w, data):
 			se += (np.log(1. + 1./exppart)-se)*invc
 			sg += (x*part2-sg)*invc
 			sh += (-part2**2*np.outer(x,x)*exppart-sh)*invc
-			x=f.readline()
+			line=f.readline()
 	return se, sg, sh
 
 # def grad_cross_entropy_error_from_file(w, data, labels):
@@ -374,7 +374,7 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 		xtx+=np.outer(x,x)
 		xty1+=int(y1)*x
 		xty2+=int(y2)*x
-		f.readline()
+		line = f.readline()
 		c+=1
 
 	print "p done", pnum
