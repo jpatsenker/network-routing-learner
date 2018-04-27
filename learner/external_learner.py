@@ -129,6 +129,7 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 		sg2 += (x*part2_2-sg2)*invc
 		sh2 += (-part2_2**2*np.outer(x,x)*exppart_2-sh2)*invc
 		line=f.readline()
+		break
 	ret[pnum]=[se1, sg1, sh1, se2, sg2, sh2]
 
 def cross_entropy_error_from_file_multithreaded(w1, w2, data, splits,pnum,top,bottom):
@@ -155,13 +156,13 @@ def cross_entropy_error_from_file_multithreaded(w1, w2, data, splits,pnum,top,bo
 
 	return 1./cores * sum(se1), 1./cores * sum(sg1), 1./cores * sum(sh1), 1./cores * sum(se2), 1./cores * sum(sg2), 1./cores * sum(sh2)
 
-def cross_entropy_error_from_multifile_multithreaded(w1, w2, data, splits,pnum,top,bottom):
-	se1 = [0]*(len(splits)-1)
-	sg1 = [0]*(len(splits)-1)
-	sh1 = [0]*(len(splits)-1)
-	se2 = [0]*(len(splits)-1)
-	sg2 = [0]*(len(splits)-1)
-	sh2 = [0]*(len(splits)-1)
+def cross_entropy_error_from_multifile_multithreaded(w1, w2, data, splits,top,bottom):
+	se1 = [0]*50
+	sg1 = [0]*50
+	sh1 = [0]*50
+	se2 = [0]*50
+	sg2 = [0]*50
+	sh2 = [0]*50
 	m = Manager()
 	ret = m.list([[0,0,0,0,0,0]]*(len(splits)-1))
 	ps = []
@@ -508,7 +509,7 @@ class ExternalLogisticRegressor:
 			wrtr.write("Lin Regression Weights\n")
 			wrtr.write(str(ws1) + "\n" + str(ws2) + "\n")
 		print "Lin Reg complete", time.time()-t
-		self.w1, self.w2 = lm_opt_onepass_2targ(ws1, ws2, (lambda wi1, wi2, datai: cross_entropy_error_from_multifile_multithreaded(wi1, wi2, datai,top,bottom)),data, 0.01)
+		self.w1, self.w2 = lm_opt_onepass_2targ(ws1, ws2, (lambda wi1, wi2, datai: cross_entropy_error_from_multifile_multithreaded(wi1, wi2, data,top,bottom)),data, 0.01)
 		return self.w1, self.w2
 
 
