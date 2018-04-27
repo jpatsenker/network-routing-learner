@@ -132,6 +132,7 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 		sg2 += (x*part2_2-sg2)*invc
 		sh2 += (-part2_2**2*np.outer(x,x)*exppart_2-sh2)*invc
 		line=f.readline()
+		break
 	ret[pnum]=[se1, sg1, sh1, se2, sg2, sh2]
 
 def cross_entropy_error_from_file_multithreaded(w1, w2, data, splits,pnum,top,bottom):
@@ -376,6 +377,7 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 		xty2+=int(y2)*x
 		line = f.readline()
 		c+=1
+		break
 
 	print "p done", pnum
 	ret[pnum]=[xtx,xty1,xty2]
@@ -589,5 +591,5 @@ def run_airport():
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-run_airport()
+run_gowalla()
 #print get_split_norm_points("data/airport_net/dataset/airport_ds.txt", 212468368./50.)
