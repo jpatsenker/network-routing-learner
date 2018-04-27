@@ -170,7 +170,7 @@ def cross_entropy_error_from_multifile_multithreaded(w1, w2, data, splits,pnum,t
 	print "hi"
 	sys.stdout.flush()
 	for i in range(50):
-		p=Process(target=delegate_cross_entropy_error_from_multiple_files, args=(w1, w2, fs[i], i, ret,i-1,top,bottom))
+		p=Process(target=delegate_cross_entropy_error_from_multiple_files, args=(w1, w2, fs[i], ret, i,top,bottom))
 		ps.append(p)
 		p.start()
 
