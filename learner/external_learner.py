@@ -112,7 +112,7 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 	count=0
 	line=f.readline()
 	while line:
-		if count%1000000==0:
+		if count%100000==0:
 			print count
 			sys.stdout.flush()
 		count+=1.
@@ -363,6 +363,9 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 	xty2=0.
 	c=0
 	while line:
+		if c%1000==100000:
+			print c, time.time()
+			sys.stdout.flush()
 		sys.stdout.flush()
 		d=np.fromstring(line, dtype=float, sep=' ')
 		x=(d[:-2]-bottom)/top
