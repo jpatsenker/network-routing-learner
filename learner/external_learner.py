@@ -361,6 +361,8 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 	xty2=0.
 	c=0
 	while line:
+		print "hi"
+		sys.stdout.flush()
 		d=np.fromstring(line, dtype=float, sep=' ')
 		x=(d[:-2]-bottom)/top
 		y1=2.*(d[-2]-0.5)
@@ -370,6 +372,7 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 		xty2+=int(y2)*x
 		f.readline()
 		c+=1
+		break
 #		if c%100==0:
 #			print c
 	print "p done", pnum
