@@ -143,8 +143,6 @@ def cross_entropy_error_from_file_multithreaded(w1, w2, data, splits,pnum,top,bo
 	ps = []
 	fs = [open(data, "r") for i in range(len(splits)-1)]
 	cores=len(splits)-1
-	print "hi"
-	sys.stdout.flush()
 	for i in range(1,len(splits)):
 		fs[i-1].seek(splits[i-1])
 		p=Process(target=delegate_cross_entropy_error_from_file, args=(w1, w2, fs[i-1], pnum, ret,i-1,top,bottom))
@@ -169,6 +167,8 @@ def cross_entropy_error_from_multifile_multithreaded(w1, w2, data, splits,pnum,t
 	ps = []
 	fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
 	cores=50
+	print "hi"
+	sys.stdout.flush()
 	for i in range(50):
 		p=Process(target=delegate_cross_entropy_error_from_multiple_files, args=(w1, w2, fs[i], i, ret,i-1,top,bottom))
 		ps.append(p)
