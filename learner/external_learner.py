@@ -156,7 +156,7 @@ def cross_entropy_error_from_file_multithreaded(w1, w2, data, splits,pnum,top,bo
 
 	return 1./cores * sum(se1), 1./cores * sum(sg1), 1./cores * sum(sh1), 1./cores * sum(se2), 1./cores * sum(sg2), 1./cores * sum(sh2)
 
-def cross_entropy_error_from_multifile_multithreaded(w1, w2, data, splits,top,bottom):
+def cross_entropy_error_from_multifile_multithreaded(w1, w2, data,top,bottom):
 	se1 = [0]*50
 	sg1 = [0]*50
 	sh1 = [0]*50
@@ -164,7 +164,7 @@ def cross_entropy_error_from_multifile_multithreaded(w1, w2, data, splits,top,bo
 	sg2 = [0]*50
 	sh2 = [0]*50
 	m = Manager()
-	ret = m.list([[0,0,0,0,0,0]]*(len(splits)-1))
+	ret = m.list([[0,0,0,0,0,0]]*50)
 	ps = []
 	fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
 	cores=50
