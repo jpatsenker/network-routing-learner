@@ -109,8 +109,8 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 	count=0
 	line=f.readline()
 	while line:
-		if count%100==0:
-			print "HII"
+		if count%1000000==0:
+			print count
 			sys.stdout.flush()
 		count+=1.
 		line=np.fromstring(line,dtype=float,sep=' ')
@@ -129,7 +129,6 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 		sg2 += (x*part2_2-sg2)*invc
 		sh2 += (-part2_2**2*np.outer(x,x)*exppart_2-sh2)*invc
 		line=f.readline()
-		break
 	ret[pnum]=[se1, sg1, sh1, se2, sg2, sh2]
 
 def cross_entropy_error_from_file_multithreaded(w1, w2, data, splits,pnum,top,bottom):
@@ -168,8 +167,6 @@ def cross_entropy_error_from_multifile_multithreaded(w1, w2, data,top,bottom):
 	ps = []
 	fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
 	cores=50
-	print "hi"
-	sys.stdout.flush()
 	for i in range(50):
 		p=Process(target=delegate_cross_entropy_error_from_multiple_files, args=(w1, w2, fs[i], ret, i,top,bottom))
 		ps.append(p)
@@ -362,7 +359,6 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 	xty2=0.
 	c=0
 	while line:
-		print "hi"
 		sys.stdout.flush()
 		d=np.fromstring(line, dtype=float, sep=' ')
 		x=(d[:-2]-bottom)/top
@@ -373,7 +369,6 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 		xty2+=int(y2)*x
 		f.readline()
 		c+=1
-		break
 #		if c%100==0:
 #			print c
 	print "p done", pnum
