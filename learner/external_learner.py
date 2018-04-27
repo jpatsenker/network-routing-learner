@@ -584,5 +584,5 @@ def run_airport():
 
 #cProfile.run("easy_lin_regressor_unit_test()")
 #cProfile.run("run()")
-run_airport()()
+run_airport()
 #print get_split_norm_points("data/airport_net/dataset/airport_ds.txt", 212468368./50.)
