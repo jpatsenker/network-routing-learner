@@ -301,7 +301,7 @@ def lm_opt_onepass(w, f, data, conv):
 		print "Iter complete with ", eta, time.time()-t
 	return w
 
-def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump_airnet.txt"):
+def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump_gowalla.txt"):
 	eta1 = 1.
 	eta2 = 1.
 	fn1=10000000.
@@ -502,7 +502,8 @@ class ExternalLogisticRegressor:
 	def regressFromFileMultithreadedMultiFile(self,data,fil="temp_dump_airnet.txt"):
 		t=time.time()
 		#top,bottom = get_norm_points(data)
-		top,bottom=np.array([2.00092774e+04,   1.00000000e+03,   1.00000000e+00, 9.15000000e+02,   6.81892407e+00,   9.15000000e+02, 1.23771376e+07]), np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.])
+		#top,bottom=np.array([2.00092774e+04,   1.00000000e+03,   1.00000000e+00, 9.15000000e+02,   6.81892407e+00,   9.15000000e+02, 1.23771376e+07]), np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.])
+		top,bottom=np.array([8.439885362102702857e+03,9.999999999998809699e+02,1.000000000000000000e+00,8.185000000000000000e+03,9.010058489805235382e+00,8.185000000000000000e+03,5.089825838814330846e+07]),np.array([0.,0.,0.,0.,0.,0.,0.])
 		print "splits calc: ", time.time()-t
 		t=time.time()
 		ws1,ws2 = self.init_reg.regressFromFileMultithreadedMultifile(data,top,bottom)
@@ -539,16 +540,19 @@ def long_lin_regressor_unit_test():
 	ws = er.regressFromFileMultithreaded("big_dat.txt")
 
 def run_gowalla():
-	open("temp_dump.txt", 'w').close()
+	open("temp_dump_gowalla.txt", 'w').close()
 	er = ExternalLogisticRegressor()
 
-	ws = er.regressFromFileMultithreaded("temp/gowalla_ml_dataset")
+	ws = er.regressFromFileMultithreadedMultiFile("temp/gowalla_ml_dataset")
+	np.savetxt("fin_weights_gowalla.txt",ws)
+
 
 def run_airport():
 	open("temp_dump_airnet.txt", 'w').close()
 	er = ExternalLogisticRegressor()
 
 	ws = er.regressFromFileMultithreadedMultiFile("data/airport_net/dataset/airport_ds")
+	np.savetxt("fin_weights_airport.txt",ws)
 
 
 # def easy_lin_regressor_unit_test():
