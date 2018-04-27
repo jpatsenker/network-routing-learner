@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import sys
+import os
 import cProfile
 from multiprocessing import Process
 from multiprocessing import Manager
@@ -71,6 +72,7 @@ def get_norm_points(file):
 
 
 def delegate_cross_entropy_error_from_file(w1, w2, f, lim, ret, pnum,top,bottom):
+	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	se1=0
 	sg1=0
 	sh1=0
@@ -100,6 +102,7 @@ def delegate_cross_entropy_error_from_file(w1, w2, f, lim, ret, pnum,top,bottom)
 	ret[pnum]=[se1, sg1, sh1, se2, sg2, sh2]
 
 def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bottom):
+	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	se1=0
 	sg1=0
 	sh1=0
@@ -353,6 +356,7 @@ def delegateRegress(f,numpoints,ret,pnum,top,bottom):
 	ret[pnum]=[xtx,xty1,xty2]
 
 def delegateRegressFullFile(f,ret,pnum,top,bottom):
+	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	line=f.readline()
 	xtx=0.
 	xty1=0.
@@ -369,8 +373,7 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 		xty2+=int(y2)*x
 		f.readline()
 		c+=1
-#		if c%100==0:
-#			print c
+
 	print "p done", pnum
 	ret[pnum]=[xtx,xty1,xty2]
 
