@@ -237,6 +237,13 @@ def cross_entropy_error_from_multifile_multithreaded_bins(w1, w2, data,top,botto
 
 	for i in range(len(ps)):
 		ps[i].join()
+		print i
+		print se1.shape
+		print sg1.shape
+		print sh1.shape
+		print se2.shape
+		print sg2.shape
+		print sh2.shape
 		se1[i], sg1[i], sh1[i], se2[i], sg2[i], sh2[i] = ret[i]
 
 	return 1./cores * sum(se1), 1./cores * sum(sg1), 1./cores * sum(sh1), 1./cores * sum(se2), 1./cores * sum(sg2), 1./cores * sum(sh2)
