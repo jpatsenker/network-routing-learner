@@ -715,6 +715,7 @@ def run_bin_airport():
 	er = ExternalLogisticRegressor()
 
 	ws = er.regressFromFileMultithreadedMultiFileBins("data/airport_net/dataset/airport_ds")
+	print ws
 	np.savetxt("fin_weights_airnet_bins.txt",ws)
 
 
