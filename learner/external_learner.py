@@ -403,7 +403,7 @@ def lm_opt_onepass_2targ_bins(w1, w2, f, data, conv, fil="temp_dump_airnet_bins.
 		fp1 = np.copy(fn1)
 		fp2 = np.copy(fn2)
 		fn1, grad1, hess1, fn2, grad2, hess2 = f(w1,w2,data)
-		for b in range(len(bins)):
+		for b in range(len(bins)-1):
 			if fp1[b] < fn1[b]:
 				eta1[b] *= 10.
 			else:
@@ -606,8 +606,8 @@ class ExternalRegressor:
 			self.xtx[i]=np.sum(xtx[i],axis=0)
 			self.xty1[i]=np.sum(xty1[i],axis=0)
 			self.xty2[i]=np.sum(xty2[i],axis=0)
-		ws1 = np.zeros([len(bins), len(top)])
-		ws2 = np.zeros([len(bins), len(top)])
+		ws1 = np.zeros([len(bins)-1, len(top)])
+		ws2 = np.zeros([len(bins)-1, len(top)])
 		for i in range(len(bins)-1):
 			print "xtx", self.xtx[i], "xty1", self.xty1[i], "xty2",self.xty2[i]
 			ws2[i] = np.dot(np.linalg.pinv(self.xtx[i]),self.xty1[i])
