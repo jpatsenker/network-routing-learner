@@ -136,12 +136,12 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 
 def delegate_cross_entropy_error_from_multiple_files_bins(w1, w2, f, ret, pnum,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
 	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
-	se1=[0]*len(bins)
-	sg1=[0]*len(bins)
-	sh1=[0]*len(bins)
-	se2=[0]*len(bins)
-	sg2=[0]*len(bins)
-	sh2=[0]*len(bins)
+	se1=[0]*(len(bins)-1)
+	sg1=[0]*(len(bins)-1)
+	sh1=[0]*(len(bins)-1)
+	se2=[0]*(len(bins)-1)
+	sg2=[0]*(len(bins)-1)
+	sh2=[0]*(len(bins)-1)
 	count=0
 	line=f.readline()
 	while line:
@@ -217,12 +217,12 @@ def cross_entropy_error_from_multifile_multithreaded(w1, w2, data,top,bottom):
 	return 1./cores * sum(se1), 1./cores * sum(sg1), 1./cores * sum(sh1), 1./cores * sum(se2), 1./cores * sum(sg2), 1./cores * sum(sh2)
 
 def cross_entropy_error_from_multifile_multithreaded_bins(w1, w2, data,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
-	se1 = np.zeros([len(bins),50])
-	sg1 = np.zeros([len(bins),50,len(top)])
-	sh1 = np.zeros([len(bins),50,len(top),len(top)])
-	se2 = np.zeros([len(bins),50])
-	sg2 = np.zeros([len(bins),50,len(top)])
-	sh2 = np.zeros([len(bins),50,len(top),len(top)])
+	se1 = np.zeros([len(bins)-1,50])
+	sg1 = np.zeros([len(bins)-1,50,len(top)])
+	sh1 = np.zeros([len(bins)-1,50,len(top),len(top)])
+	se2 = np.zeros([len(bins)-1,50])
+	sg2 = np.zeros([len(bins)-1,50,len(top)])
+	sh2 = np.zeros([len(bins)-1,50,len(top),len(top)])
 	m = Manager()
 	ret = m.list([[0,0,0,0,0,0]]*50)
 	ps = []
@@ -391,12 +391,12 @@ def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump_gowalla.txt"):
 	return w1, w2
 
 def lm_opt_onepass_2targ_bins(w1, w2, f, data, conv, fil="temp_dump_airnet_bins.txt", bins = [0,50,100,200,400,800,1600,3200,6400,12800,20000]):
-	eta1 = [1.]*len(bins)
-	eta2 = [1.]*len(bins)
-	fn1=[10000000.]*len(bins)
-	fp1=[0.]*len(bins)
-	fn2=[10000000.]*len(bins)
-	fp2=[0.]*len(bins)
+	eta1 = [1.]*(len(bins)-1)
+	eta2 = [1.]*(len(bins)-1)
+	fn1=[10000000.]*(len(bins)-1)
+	fp1=[0.]*(len(bins)-1)
+	fn2=[10000000.]*(len(bins)-1)
+	fp2=[0.]*(len(bins) - 1)
 	c=0
 	while l2norm(fn1-fp1)>conv and l2norm(fn2-fp2)>conv:
 		t=time.time()
@@ -473,9 +473,9 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
 	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	line=f.readline()
-	xtx=np.zeros([len(bins),len(top),len(top)])
-	xty1=np.zeros([len(bins),len(top)])
-	xty2=np.zeros([len(bins),len(top)])
+	xtx=np.zeros([len(bins)-1,len(top),len(top)])
+	xty1=np.zeros([len(bins)-1,len(top)])
+	xty2=np.zeros([len(bins)-1,len(top)])
 	c=0
 	while line:
 		if c%1000==100000:
