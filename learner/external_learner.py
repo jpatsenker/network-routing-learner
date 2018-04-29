@@ -226,7 +226,7 @@ def cross_entropy_error_from_multifile_multithreaded_bins(w1, w2, data,top,botto
 	sg2 = np.zeros([len(bins)-1,50,len(top)])
 	sh2 = np.zeros([len(bins)-1,50,len(top),len(top)])
 	m = Manager()
-	ret = m.list([[[0,0,0,0,0,0]]*(len(bins)-1)]*50)
+	ret = m.list([[[0,0,0,0,0,0]]*50]*(len(bins)-1))
 	ps = []
 	fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
 	cores=50
