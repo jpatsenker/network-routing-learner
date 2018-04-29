@@ -610,7 +610,7 @@ class ExternalRegressor:
 		ws1 = np.zeros([len(bins), len(top)])
 		ws2 = np.zeros([len(bins), len(top)])
 		for i in range(len(bins)-1):
-			print self.xtx[i],self.xty1[i],self.xty2[i]
+			print "xtx", self.xtx[i], "xty1", self.xty1[i], "xty2",self.xty2[i]
 			ws2[i] = np.dot(np.linalg.pinv(self.xtx[i]),self.xty1[i])
 			ws2[i] = np.dot(np.linalg.pinv(self.xtx[i]),self.xty2[i])
 		return ws1, ws2
