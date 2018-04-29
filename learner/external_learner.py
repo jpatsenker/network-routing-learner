@@ -524,8 +524,8 @@ class ExternalRegressor:
 		return -1.
 
 	def final(self):
-		self.w1 = np.dot(np.linalg.inv(self.xtx),self.xty1)
-		self.w2 = np.dot(np.linalg.inv(self.xtx),self.xty2)
+		self.w1 = np.dot(np.linalg.pinv(self.xtx),self.xty1)
+		self.w2 = np.dot(np.linalg.pinv(self.xtx),self.xty2)
 		return self.w1, self.w2
 
 	def regressFromFile(self,data):
@@ -607,7 +607,12 @@ class ExternalRegressor:
 			self.xtx[i]=np.sum(xtx[i],axis=0)
 			self.xty1[i]=np.sum(xty1[i],axis=0)
 			self.xty2[i]=np.sum(xty2[i],axis=0)
-		return self.final()
+		ws1 = np.zeros([len(bins), len(top)])
+		ws2 = np.zeros([len(bins), len(top)])
+		for i in range(len(bins)-1):
+			ws2[i] = np.dot(np.linalg.pinv(self.xtx[i]),self.xty1[i])
+			ws2[i] = np.dot(np.linalg.pinv(self.xtx[i]),self.xty2[i])
+		return ws1, ws2
 
 class ExternalLogisticRegressor:
 
