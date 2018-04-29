@@ -153,19 +153,20 @@ def delegate_cross_entropy_error_from_multiple_files_bins(w1, w2, f, ret, pnum,t
 		x=(line[:-2]-bottom)/top
 		y1=(line[-2]-0.5)*2.
 		y2=(line[-1]-0.5)*2.
-		exppart_1=np.e**(y1*np.dot(w1,x))
-		exppart_2=np.e**(y2*np.dot(w2,x))
-		part2_1 = -y1/(1.+exppart_1)
-		part2_2 = -y2/(1.+exppart_2)
-		invc=1./count
 		for b in range(len(bins)-1):
 			if x[0] > bins[b] and x[1]<bins[b+1]:
+				exppart_1=np.e**(y1*np.dot(w1,x))
+				exppart_2=np.e**(y2*np.dot(w2,x))
+				part2_1 = -y1/(1.+exppart_1)
+				part2_2 = -y2/(1.+exppart_2)
+				invc=1./count
 				se1[b] += (np.log(1. + 1./exppart_1)-se1[b])*invc
 				sg1[b] += (x*part2_1-sg1[b])*invc
 				sh1[b] += (-part2_1**2*np.outer(x,x)*exppart_1-sh1[b])*invc
 				se2[b] += (np.log(1. + 1./exppart_2)-se2[b])*invc
 				sg2[b] += (x*part2_2-sg2[b])*invc
 				sh2[b] += (-part2_2**2*np.outer(x,x)*exppart_2-sh2[b])*invc
+			continue
 		line=f.readline()
 	ret[pnum]=[se1, sg1, sh1, se2, sg2, sh2]
 
