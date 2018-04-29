@@ -493,6 +493,7 @@ def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800
 				xty2[b]+=int(y2)*x
 		line = f.readline()
 		c+=1
+		break
 
 	print "p done", pnum
 	ret[pnum]=[xtx,xty1,xty2]
