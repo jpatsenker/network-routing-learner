@@ -603,6 +603,7 @@ class ExternalRegressor:
 			ps[i].join()
 			xtx[i], xty1[i], xty2[i] = ret[i]
 		for i in range(xtx.shape[0]):
+			print xtx.shape, i, self.xtx.shape
 			self.xtx[i]=np.sum(xtx[:,i,:,:],axis=0)
 			self.xty1[i]=np.sum(xty1[:,i,:],axis=0)
 			self.xty2[i]=np.sum(xty2[:,i,:],axis=0)
