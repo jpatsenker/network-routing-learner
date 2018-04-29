@@ -230,7 +230,7 @@ def cross_entropy_error_from_multifile_multithreaded_bins(w1, w2, data,top,botto
 	ret = m.list([[[0,0,0,0,0,0]]*50]*(len(bins)-1))
 	ps = []
 	fs = [open(data + str(i) + ".txt", "r") for i in range(50)]
-	cores=50
+	cores=50.
 	for i in range(50):
 		p=Process(target=delegate_cross_entropy_error_from_multiple_files_bins, args=(w1, w2, fs[i], ret, i,top,bottom,bins))
 		ps.append(p)
@@ -238,14 +238,8 @@ def cross_entropy_error_from_multifile_multithreaded_bins(w1, w2, data,top,botto
 
 	for i in range(len(ps)):
 		ps[i].join()
-		print i
-		print se1.shape
-		print sg1.shape
-		print sh1.shape
-		print se2.shape
-		print sg2.shape
-		print sh2.shape
-		se1[i], sg1[i], sh1[i], se2[i], sg2[i], sh2[i] = ret[i]
+		for b in range(len(bins)-1):
+			se1[b,i], sg1[b,i], sh1[b,i], se2[b,i], sg2[b,i], sh2[b,i] = ret[b][i]
 
 	return 1./cores * np.sum(se1,axis=1), 1./cores * np.sum(sg1,axis=1), 1./cores * np.sum(sh1,axis=1), 1./cores * np.sum(se2,axis=1), 1./cores * np.sum(sg2,axis=1), 1./cores * np.sum(sh2,axis=1)
 
