@@ -582,9 +582,12 @@ class ExternalRegressor:
 		return self.final()
 
 	def regressFromFileMultithreadedMultifileBins(self,data,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
-		xtx = [0]*50
-		xty1 = [0]*50
-		xty2 = [0]*50
+		self.xtx=np.zeros([len(bins),50])
+		self.xty1=np.zeros([len(bins),50])
+		self.xty2=np.zeros([len(bins),50])
+		xtx = np.zeros([len(bins),50])
+		xty1 = np.zeros([len(bins),50])
+		xty2 = np.zeros([len(bins),50])
 		m = Manager()
 		ret = m.list([[0,0,0]]*50)
 		ps = []
