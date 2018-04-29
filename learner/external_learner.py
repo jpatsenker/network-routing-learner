@@ -136,12 +136,12 @@ def delegate_cross_entropy_error_from_multiple_files(w1, w2, f, ret, pnum,top,bo
 
 def delegate_cross_entropy_error_from_multiple_files_bins(w1, w2, f, ret, pnum,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
 	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
-	se1=[0]*(len(bins)-1)
-	sg1=[0]*(len(bins)-1)
-	sh1=[0]*(len(bins)-1)
-	se2=[0]*(len(bins)-1)
-	sg2=[0]*(len(bins)-1)
-	sh2=[0]*(len(bins)-1)
+	se1 = np.zeros([len(bins)-1])
+	sg1 = np.zeros([len(bins)-1,len(top)])
+	sh1 = np.zeros([len(bins)-1,len(top),len(top)])
+	se2 = np.zeros([len(bins)-1])
+	sg2 = np.zeros([len(bins)-1,len(top)])
+	sh2 = np.zeros([len(bins)-1,len(top),len(top)])
 	count=0
 	line=f.readline()
 	while line:
