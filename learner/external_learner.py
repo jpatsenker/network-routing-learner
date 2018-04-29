@@ -524,8 +524,8 @@ class ExternalRegressor:
 		return -1.
 
 	def final(self):
-		self.w1 = np.dot(np.linalg.pinv(self.xtx),self.xty1)
-		self.w2 = np.dot(np.linalg.pinv(self.xtx),self.xty2)
+		self.w1 = np.dot(np.linalg.inv(self.xtx),self.xty1)
+		self.w2 = np.dot(np.linalg.inv(self.xtx),self.xty2)
 		return self.w1, self.w2
 
 	def regressFromFile(self,data):
