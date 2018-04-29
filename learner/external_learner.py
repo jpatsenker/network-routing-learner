@@ -601,7 +601,7 @@ class ExternalRegressor:
 			print "start", p
 		for i in range(len(ps)):
 			ps[i].join()
-			print ret[i]
+			print ret[i].shape, xtx[i].shape, xty1[i].shape
 			xtx[i], xty1[i], xty2[i] = ret[i]
 		for i in range(xtx.shape[0]):
 			self.xtx[i]=np.sum(xtx[i],axis=0)
