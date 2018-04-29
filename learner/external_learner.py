@@ -218,11 +218,11 @@ def cross_entropy_error_from_multifile_multithreaded(w1, w2, data,top,bottom):
 
 def cross_entropy_error_from_multifile_multithreaded_bins(w1, w2, data,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
 	se1 = np.zeros([len(bins),50])
-	sg1 = np.zeros([len(bins),50])
-	sh1 = np.zeros([len(bins),50])
+	sg1 = np.zeros([len(bins),50,len(top)])
+	sh1 = np.zeros([len(bins),50,len(top),len(top)])
 	se2 = np.zeros([len(bins),50])
-	sg2 = np.zeros([len(bins),50])
-	sh2 = np.zeros([len(bins),50])
+	sg2 = np.zeros([len(bins),50,len(top)])
+	sh2 = np.zeros([len(bins),50,len(top),len(top)])
 	m = Manager()
 	ret = m.list([[0,0,0,0,0,0]]*50)
 	ps = []
@@ -473,9 +473,9 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
 	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	line=f.readline()
-	xtx=np.zeros(len(bins))
-	xty1=np.zeros(len(bins))
-	xty2=np.zeros(len(bins))
+	xtx=[0]*len(bins)
+	xty1=[0]*len(bins)
+	xty2=[0]*len(bins)
 	c=0
 	while line:
 		if c%1000==100000:
@@ -486,9 +486,8 @@ def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800
 		x=(d[:-2]-bottom)/top
 		y1=2.*(d[-2]-0.5)
 		y2=2.*(d[-1]-0.5)
-		for b in range(len(bins)):
-			print b
-			if x[0] > bins[b] and x[1]<bins[b+1]:
+		for b in range(len(bins)-1):
+			if x[0] > bins[b] and x[1] < bins[b+1]:
 				xtx[b]+=np.outer(x,x)
 				xty1[b]+=int(y1)*x
 				xty2[b]+=int(y2)*x
@@ -583,12 +582,12 @@ class ExternalRegressor:
 		return self.final()
 
 	def regressFromFileMultithreadedMultifileBins(self,data,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
-		self.xtx=np.zeros([len(bins),50])
-		self.xty1=np.zeros([len(bins),50])
-		self.xty2=np.zeros([len(bins),50])
-		xtx = np.zeros([len(bins),50])
-		xty1 = np.zeros([len(bins),50])
-		xty2 = np.zeros([len(bins),50])
+		self.xtx=np.zeros([len(bins),50,len(top),len(top)])
+		self.xty1=np.zeros([len(bins),50,len(top)])
+		self.xty2=np.zeros([len(bins),50,len(top)])
+		xtx = np.zeros([len(bins),50,len(top),len(top)])
+		xty1 = np.zeros([len(bins),50,len(top)])
+		xty2 = np.zeros([len(bins),50,len(top)])
 		m = Manager()
 		ret = m.list([[0,0,0]]*50)
 		ps = []
