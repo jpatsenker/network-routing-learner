@@ -246,7 +246,7 @@ def cross_entropy_error_from_multifile_multithreaded_bins(w1, w2, data,top,botto
 		print sh2.shape
 		se1[i], sg1[i], sh1[i], se2[i], sg2[i], sh2[i] = ret[i]
 
-	return 1./cores * sum(se1), 1./cores * sum(sg1), 1./cores * sum(sh1), 1./cores * sum(se2), 1./cores * sum(sg2), 1./cores * sum(sh2)
+	return 1./cores * np.sum(se1,axis=1), 1./cores * np.sum(sg1,axis=1), 1./cores * np.sum(sh1,axis=1), 1./cores * np.sum(se2,axis=1), 1./cores * np.sum(sg2,axis=1), 1./cores * np.sum(sh2,axis=1)
 
 def cross_entropy_error_from_file(w, data):
 	se = 0
