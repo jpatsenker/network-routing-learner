@@ -390,7 +390,7 @@ def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump_gowalla.txt"):
 		print "Iter complete with ", eta1, eta2, time.time()-t
 	return w1, w2
 
-def lm_opt_onepass_2targ_bins(w1, w2, f, data, conv, fil="temp_dump_gowalla.txt", bins = [0,50,100,200,400,800,1600,3200,6400,12800,20000]):
+def lm_opt_onepass_2targ_bins(w1, w2, f, data, conv, fil="temp_dump_airnet_bins.txt", bins = [0,50,100,200,400,800,1600,3200,6400,12800,20000]):
 	eta1 = [1.]*len(bins)
 	eta2 = [1.]*len(bins)
 	fn1=[10000000.]*len(bins)
