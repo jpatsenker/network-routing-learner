@@ -473,9 +473,9 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
 	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	line=f.readline()
-	xtx=0.
-	xty1=0.
-	xty2=0.
+	xtx=np.zeros(len(bins))
+	xty1=np.zeros(len(bins))
+	xty2=np.zeros(len(bins))
 	c=0
 	while line:
 		if c%1000==100000:
