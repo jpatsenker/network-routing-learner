@@ -169,7 +169,8 @@ def delegate_cross_entropy_error_from_multiple_files_bins(w1, w2, f, ret, pnum,t
 			continue
 		line=f.readline()
 		break
-	ret[pnum]=[se1, sg1, sh1, se2, sg2, sh2]
+	for b in range(len(bin)-1):
+		ret[b,pnum]=[se1[b], sg1[b], sh1[b], se2[b], sg2[b], sh2[b]]
 
 def cross_entropy_error_from_file_multithreaded(w1, w2, data, splits,pnum,top,bottom):
 	se1 = [0]*(len(splits)-1)
