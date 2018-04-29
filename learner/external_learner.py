@@ -362,12 +362,12 @@ def lm_opt_onepass(w, f, data, conv):
 def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump_gowalla.txt"):
 	eta1 = 1.
 	eta2 = 1.
-	fn1=[10000000.]
-	fp1=[0.]
-	fn2=[10000000.]
-	fp2=[0.]
+	fn1=10000000.
+	fp1=0.
+	fn2=10000000.
+	fp2=0.
 	c=0
-	while l2norm(fn1[0]-fp1[0])>conv and l2norm(fn2[0]-fp2[0])>conv:
+	while l2norm(fn1-fp1)>conv and l2norm(fn2-fp2)>conv:
 		t=time.time()
 		fp1 = np.copy(fn1)
 		fp2 = np.copy(fn2)
@@ -380,7 +380,6 @@ def lm_opt_onepass_2targ(w1, w2, f, data, conv, fil="temp_dump_gowalla.txt"):
 			eta2 *= 10.
 		else:
 			eta2 *= .1
-		fn=0
 		#print hess1.shape, grad1.shape, eta1, w1.shape
 		w1 += np.dot(np.linalg.pinv(hess1 - eta1*np.identity(w1.shape[0])),grad1)
 		w2 += np.dot(np.linalg.pinv(hess2 - eta2*np.identity(w2.shape[0])),grad2)
@@ -399,7 +398,7 @@ def lm_opt_onepass_2targ_bins(w1, w2, f, data, conv, fil="temp_dump_airnet_bins.
 	fn2=[10000000.]*(len(bins)-1)
 	fp2=[0.]*(len(bins) - 1)
 	c=0
-	while l2norm(fn1-fp1)>conv and l2norm(fn2-fp2)>conv:
+	while l2norm(fn1[0]-fp1[0])>conv and l2norm(fn2[0]-fp2[0])>conv:
 		t=time.time()
 		fp1 = np.copy(fn1)
 		fp2 = np.copy(fn2)
