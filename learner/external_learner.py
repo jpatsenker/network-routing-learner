@@ -487,6 +487,7 @@ def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800
 		y1=2.*(d[-2]-0.5)
 		y2=2.*(d[-1]-0.5)
 		for b in range(len(bins)):
+			print b
 			if x[0] > bins[b] and x[1]<bins[b+1]:
 				xtx[b]+=np.outer(x,x)
 				xty1[b]+=int(y1)*x
