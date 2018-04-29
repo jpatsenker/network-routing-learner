@@ -158,7 +158,7 @@ def delegate_cross_entropy_error_from_multiple_files_bins(w1, w2, f, ret, pnum,t
 		part2_1 = -y1/(1.+exppart_1)
 		part2_2 = -y2/(1.+exppart_2)
 		invc=1./count
-		for b in range(len(bins)):
+		for b in range(len(bins)-1):
 			if x[0] > bins[b] and x[1]<bins[b+1]:
 				se1[b] += (np.log(1. + 1./exppart_1)-se1)*invc
 				sg1[b] += (x*part2_1-sg1)*invc
@@ -473,9 +473,9 @@ def delegateRegressFullFile(f,ret,pnum,top,bottom):
 def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
 	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	line=f.readline()
-	xtx=[0]*len(bins)
-	xty1=[0]*len(bins)
-	xty2=[0]*len(bins)
+	xtx=np.zeros([len(bins),len(top),len(top)])
+	xty1=np.zeros([len(bins),len(top)])
+	xty2=np.zeros([len(bins),len(top)])
 	c=0
 	while line:
 		if c%1000==100000:
@@ -488,7 +488,6 @@ def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800
 		y2=2.*(d[-1]-0.5)
 		for b in range(len(bins)-1):
 			if x[0] > bins[b] and x[1] < bins[b+1]:
-				print b
 				xtx[b]+=np.outer(x,x)
 				xty1[b]+=int(y1)*x
 				xty2[b]+=int(y2)*x
