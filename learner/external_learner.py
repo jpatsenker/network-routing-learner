@@ -583,12 +583,12 @@ class ExternalRegressor:
 		return self.final()
 
 	def regressFromFileMultithreadedMultifileBins(self,data,top,bottom,bins=[0,50,100,200,400,800,1600,3200,6400,12800,20000]):
-		self.xtx=np.zeros([len(bins),50,len(top),len(top)])
-		self.xty1=np.zeros([len(bins),50,len(top)])
-		self.xty2=np.zeros([len(bins),50,len(top)])
-		xtx = np.zeros([len(bins),50,len(top),len(top)])
-		xty1 = np.zeros([len(bins),50,len(top)])
-		xty2 = np.zeros([len(bins),50,len(top)])
+		self.xtx=np.zeros([50,len(bins),len(top),len(top)])
+		self.xty1=np.zeros([50,len(bins),len(top)])
+		self.xty2=np.zeros([50,len(bins),len(top)])
+		xtx = np.zeros([50,len(bins),len(top),len(top)])
+		xty1 = np.zeros([50,len(bins),len(top)])
+		xty2 = np.zeros([50,len(bins),len(top)])
 		m = Manager()
 		ret = m.list([[0,0,0]]*50)
 		ps = []
@@ -601,7 +601,7 @@ class ExternalRegressor:
 			print "start", p
 		for i in range(len(ps)):
 			ps[i].join()
-			print ret[i].shape, xtx[i].shape, xty1[i].shape
+			# print ret[i].shape, xtx[i].shape, xty1[i].shape
 			xtx[i], xty1[i], xty2[i] = ret[i]
 		for i in range(xtx.shape[0]):
 			self.xtx[i]=np.sum(xtx[i],axis=0)
