@@ -6,6 +6,7 @@ from core.user import User
 import pickle as pickle
 import random
 import math
+from multiprocessing import Process, Manager
 
 top,bottom=np.array([2.00092774e+04,   1.00000000e+03,   1.00000000e+00, 9.15000000e+02,   6.81892407e+00,   9.15000000e+02, 1.23771376e+07]), np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.])
 
@@ -113,11 +114,29 @@ def simulation(graph,weights):
 		hops += 1
 	return hops, bfs(graph,destination)[source]
 
+def simulation_delegate(graph, weights, ret, pnum):
+	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
+	ret[pnum] = simulation(graph,weights)
+
 
 def monte_carlo(graph,weights,iters):
 	stretch = np.zeros(iters)
 	for i in range(iters):
 		route, shortest = simulation(graph,weights)
+		stretch[i] = route/shortest
+	return stretch
+
+def monte_carlo_multi(graph,weights,iters):
+	stretch = np.zeros(iters)
+	ps=[]
+	m=Manager()
+	ret = m.list([0]*len(iters))
+	for i in range(iters):
+		ps.append(Process(target=simulation, args=(graph, weights,ret,i)))
+		ps[-1].start()
+	for i in range(iters):
+		ps[i].join()
+		route, shortest = ret[i]
 		stretch[i] = route/shortest
 	return stretch
 
@@ -130,10 +149,10 @@ with open('data/airport_net/airnet.pkl','rb') as w:
 with open('GraphSets/test_graph.pkl','rb') as w:
 	gowalla = reindex_dict(pickle.load(w))
 
-air_aw = monte_carlo(airnet, airnet_weights, 100)
-air_gw = monte_carlo(airnet, gowalla_weights, 100)
-gow_aw = monte_carlo(gowalla, airnet_weights, 100)
-gow_gw = monte_carlo(gowalla, gowalla_weights, 100)
+air_aw = monte_carlo(airnet, airnet_weights, 20)
+air_gw = monte_carlo(airnet, gowalla_weights, 20)
+gow_aw = monte_carlo(gowalla, airnet_weights, 20)
+gow_gw = monte_carlo(gowalla, gowalla_weights, 20)
 
 np.savetxt(air_aw, "evaluations/air_aw.txt")
 np.savetxt(air_gw, "evaluations/air_gw.txt")
