@@ -88,6 +88,7 @@ def simulation(graph,weights):
 			locality = sum(map(lambda z: distance(graph[z].pos,graph[source].pos), n.friends))
 			features = np.array([dist,wdist,cic,deg,wdeg,medpower,locality])
 			#print (weights, features)
+			print(np.dot(weights.astype(float),features.astype(float)))
 			neighbor_totals[i] = theta(np.dot(weights.astype(float),features.astype(float)))
 		neighbor_totals = np.array(neighbor_totals)/sum(neighbor_totals)
 		print(neighbor_totals)
