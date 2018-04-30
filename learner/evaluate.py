@@ -7,6 +7,9 @@ import pickle as pickle
 import random
 import math
 
+top,bottom=np.array([2.00092774e+04,   1.00000000e+03,   1.00000000e+00, 9.15000000e+02,   6.81892407e+00,   9.15000000e+02, 1.23771376e+07]), np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.])
+
+
 def reindex_dict(nodes):
 	inodes = dict()
 	ndic = dict(zip(range(len(nodes.keys())), nodes.keys()))
@@ -87,8 +90,9 @@ def simulation(graph,weights):
 			medpower = np.median(list(map(lambda z: graph[z].deg1, n.friends)))
 			locality = sum(map(lambda z: distance(graph[z].pos,graph[source].pos), n.friends))
 			features = np.array([dist,wdist,cic,deg,wdeg,medpower,locality])
+			features = (features.astype(float)-bottom)/top
 			#print (weights, features)
-			print(weights.astype(float),features.astype(float))
+			#print(weights,features)
 			neighbor_totals[i] = theta(np.dot(weights.astype(float),features.astype(float)))
 		neighbor_totals = np.array(neighbor_totals)/sum(neighbor_totals)
 		print(neighbor_totals)
