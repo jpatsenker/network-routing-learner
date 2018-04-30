@@ -151,12 +151,15 @@ with open('GraphSets/test_graph.pkl','rb') as w:
 	gowalla = reindex_dict(pickle.load(w))
 
 air_aw = monte_carlo_multi(airnet, airnet_weights, 1)
-air_gw = monte_carlo_multi(airnet, gowalla_weights, 1)
-gow_aw = monte_carlo_multi(gowalla, airnet_weights, 1)
-gow_gw = monte_carlo_multi(gowalla, gowalla_weights, 1)
-
 np.savetxt("evaluations/air_aw.txt",air_aw)
+
+air_gw = monte_carlo_multi(airnet, gowalla_weights, 1)
 np.savetxt("evaluations/air_gw.txt",air_gw)
+
+gow_aw = monte_carlo_multi(gowalla, airnet_weights, 1)
 np.savetxt("evaluations/gow_aw.txt",gow_aw)
+
+gow_gw = monte_carlo_multi(gowalla, gowalla_weights, 1)
 np.savetxt("evaluations/gow_gw.txt",gow_gw)
+
 
