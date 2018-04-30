@@ -94,6 +94,7 @@ def simulation(graph,weights):
 			#print (weights, features)
 			#print(weights,features)
 			neighbor_totals[i] = theta(np.dot(weights.astype(float),features.astype(float)))
+		print (neighbor_totals)
 		neighbor_totals = np.array(neighbor_totals)/sum(neighbor_totals)
 		print(neighbor_totals)
 		r = random.random()
@@ -102,7 +103,9 @@ def simulation(graph,weights):
 		while s<r and i<len(neighbor_totals):
 			s+=neighbor_totals[i]
 			i+=1
-		curr=neighbors[i]
+		if i==0:
+			i=1
+		curr=neighbors[i-1]
 		hops += 1
 	return hops, bfs(graph,d)[s]
 
