@@ -54,7 +54,7 @@ def simulation(graph,weights):
 	curr = source
 	hops = 0
 	while curr != destination:
-		neighbors = graph[source].friends
+		neighbors = graph[curr].friends
 		neighbor_totals = np.zeros(len(neighbors))
 		for i in range(len(neighbors)):
 			neighbor=neighbors[i]
@@ -66,7 +66,7 @@ def simulation(graph,weights):
 			wdist = sig1(dist)
 			cic = float(len(set(n.comm).intersection(d.comm)))
 			medpower = np.median(list(map(lambda z: graph[z].deg1, n.friends)))
-			locality = sum(map(lambda z: distance(graph[z].pos,s.pos), n.friends))
+			locality = sum(map(lambda z: distance(graph[z].pos,graph[source].pos), n.friends))
 			features = np.array([dist,wdist,cic,deg,wdeg,medpower,locality])
 			neighbor_totals[i] = theta(np.dot(weights,features))
 
