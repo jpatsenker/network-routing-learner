@@ -491,13 +491,13 @@ def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800
 		y2=2.*(d[-1]-0.5)
 		for b in range(len(bins)-1):
 			if x[0] > bins[b] and x[0] < bins[b+1]:
+				print b
 				xtx[b]+=np.outer(x,x)
 				xty1[b]+=int(y1)*x
 				xty2[b]+=int(y2)*x
 				continue
 		line = f.readline()
 		c+=1
-	print xtx, xty1, xty2
 	print "p done", pnum
 	ret[pnum]=[xtx,xty1,xty2]
 
@@ -611,7 +611,7 @@ class ExternalRegressor:
 		ws1 = np.zeros([len(bins)-1, len(top)])
 		ws2 = np.zeros([len(bins)-1, len(top)])
 		for i in range(len(bins)-1):
-			ws2[i] = np.dot(np.linalg.pinv(self.xtx[i]),self.xty1[i])
+			ws1[i] = np.dot(np.linalg.pinv(self.xtx[i]),self.xty1[i])
 			ws2[i] = np.dot(np.linalg.pinv(self.xtx[i]),self.xty2[i])
 		return ws1, ws2
 
