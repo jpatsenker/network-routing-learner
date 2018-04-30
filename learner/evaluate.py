@@ -53,8 +53,9 @@ def simulation(graph,weights):
 	destination = int(random.random()*graph_size)
 	curr = source
 	hops = 0
+	print(graph)
 	while curr != destination:
-		print graph
+		print(hops, curr)
 		neighbors = graph[curr].friends
 		if destination in neighbors:
 			hops+=1
