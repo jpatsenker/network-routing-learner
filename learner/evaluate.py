@@ -88,11 +88,11 @@ def simulation(graph,weights):
 			locality = sum(map(lambda z: distance(graph[z].pos,graph[source].pos), n.friends))
 			features = np.array([dist,wdist,cic,deg,wdeg,medpower,locality])
 			neighbor_totals[i] = theta(np.dot(weights,features))
-
+		neighbor_totals = np.array(neighbor_totals)/sum(neighbor_totals)
 		r = random.random()
 		s = 0
 		i=0
-		while s<r:
+		while s<r and i<len(neighbor_totals):
 			s+=neighbor_totals[i]
 			i+=1
 		curr=neighbors[i]
