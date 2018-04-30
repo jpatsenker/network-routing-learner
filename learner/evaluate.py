@@ -130,7 +130,7 @@ def monte_carlo_multi(graph,weights,iters):
 	stretch = np.zeros(iters)
 	ps=[]
 	m=Manager()
-	ret = m.list([0]*len(iters))
+	ret = m.list([0]*iters)
 	for i in range(iters):
 		ps.append(Process(target=simulation, args=(graph, weights,ret,i)))
 		print("<starting ", i, ">")
