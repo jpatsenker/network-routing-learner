@@ -69,10 +69,14 @@ def simulation(graph,weights):
 
 	source = int(random.random()*graph_size)
 	destination = int(random.random()*graph_size)
+	while bfs(graph,destination)[source] == -1:
+		source = int(random.random()*graph_size)
+		destination = int(random.random()*graph_size)
+	print("ROUTING FROM ", source, "TO", destination)
 	curr = source
 	hops = 0
 	while curr != destination:
-		print(hops, curr)
+		#print(hops, curr)
 		neighbors = graph[curr].friends
 		if destination in neighbors:
 			hops+=1
@@ -94,9 +98,9 @@ def simulation(graph,weights):
 			#print (weights, features)
 			#print(weights,features)
 			neighbor_totals[i] = theta(np.dot(weights.astype(float),features.astype(float)))
-		print (neighbor_totals)
+		#print (neighbor_totals)
 		neighbor_totals = np.array(neighbor_totals)/sum(neighbor_totals)
-		print(neighbor_totals)
+		#print(neighbor_totals)
 		r = random.random()
 		s = 0
 		i=0
@@ -107,8 +111,15 @@ def simulation(graph,weights):
 			i=1
 		curr=neighbors[i-1]
 		hops += 1
-	return hops, bfs(graph,d)[s]
+	return hops, bfs(graph,destination)[source]
 
+
+def monte_carlo(graph,weights,iters):
+	stretch = np.zeros(iters)
+	for i in range(iters):
+		route, shortest = simulation(graph,weights)
+		stretch[i] = route/shortest
+	return stretch
 
 gowalla_weights = np.array([1.468081706129472086e-01,-1.545969938352645734e+00,-5.089143668535733855e-01,4.370629297416210868e+00,-5.072072365082430423e+00,-8.362934819850959656e+00,-4.214174338656954122e-01])
 airnet_weights = np.array([-0.43524995,-2.07752073,-0.57762063,1.1298535,-1.03288428,-1.65432984,-0.14868317])
@@ -119,5 +130,13 @@ with open('data/airport_net/airnet.pkl','rb') as w:
 with open('GraphSets/test_graph.pkl','rb') as w:
 	gowalla = reindex_dict(pickle.load(w))
 
+air_aw = monte_carlo(airnet, airnet_weights, 100)
+air_gw = monte_carlo(airnet, gowalla_weights, 100)
+gow_aw = monte_carlo(gowalla, airnet_weights, 100)
+gow_gw = monte_carlo(gowalla, gowalla_weights, 100)
 
-print(simulation(airnet, airnet_weights))
+np.savetxt(air_aw, "evaluations/air_aw.txt")
+np.savetxt(air_gw, "evaluations/air_gw.txt")
+np.savetxt(gow_aw, "evaluations/gow_aw.txt")
+np.savetxt(gow_gw, "evaluations/gow_gw.txt")
+
