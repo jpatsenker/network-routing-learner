@@ -91,4 +91,4 @@ with open('GraphSets/test_graph.pkl','rb') as w:
 	gowalla = pickle.load(w)
 
 
-print simulation(airnet, airnet_weights)
+print(simulation(airnet, airnet_weights))
