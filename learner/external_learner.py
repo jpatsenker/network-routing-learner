@@ -486,7 +486,7 @@ def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800
 			sys.stdout.flush()
 		sys.stdout.flush()
 		d=np.fromstring(line, dtype=float, sep=' ')
-		dis = x[0]
+		dis = d[0]
 		x=(d[:-2]-bottom)/top
 		y1=2.*(d[-2]-0.5)
 		y2=2.*(d[-1]-0.5)
