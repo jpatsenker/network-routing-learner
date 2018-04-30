@@ -132,7 +132,7 @@ def monte_carlo_multi(graph,weights,iters):
 	m=Manager()
 	ret = m.list([0]*iters)
 	for i in range(iters):
-		ps.append(Process(target=simulation, args=(graph, weights,ret,i)))
+		ps.append(Process(target=simulation_delegate, args=(graph, weights,ret,i)))
 		print("<starting ", i, ">")
 		ps[-1].start()
 	for i in range(iters):
