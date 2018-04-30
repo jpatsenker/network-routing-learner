@@ -7,6 +7,21 @@ import pickle as pickle
 import random
 import math
 
+def reindex_dict(nodes):
+	inodes = dict()
+	ndic = dict(zip(range(len(nodes.keys())), nodes.keys()))
+	rev = {v: k for k, v in ndic.items()}
+	for n in range(len(nodes)):
+		inodes[n] = copy(nodes[ndic[n]])
+		inodes[n].uid = n
+	#   if n % 1000 == 0:
+	#       print "Done: ", n
+	for n in inodes:
+		inodes[n].friends = list(map(lambda f: rev[f], inodes[n].friends))
+	#   if n % 1000 == 0:
+	#   	print "Done: ", n
+	return inodes
+
 def deg_to_rad(deg):
 	return deg * math.pi / 180.0
 
@@ -89,10 +104,10 @@ gowalla_weights = np.array([1.468081706129472086e-01,-1.545969938352645734e+00,-
 airnet_weights = np.array([-0.43524995,-2.07752073,-0.57762063,1.1298535,-1.03288428,-1.65432984,-0.14868317])
 
 with open('data/airport_net/airnet.pkl','rb') as w:
-	airnet = pickle.load(w)
+	airnet = reindex_dict(pickle.load(w))
 
 with open('GraphSets/test_graph.pkl','rb') as w:
-	gowalla = pickle.load(w)
+	gowalla = reindex_dict(pickle.load(w))
 
 
 print(simulation(airnet, airnet_weights))
