@@ -76,7 +76,7 @@ def simulation(graph,weights):
 	print("ROUTING FROM ", source, "TO", destination)
 	curr = source
 	hops = 0
-	while curr != destination and hops < 1000:
+	while curr != destination and hops < 100:
 		#print(hops, curr)
 		neighbors = graph[curr].friends
 		if destination in neighbors:
