@@ -486,12 +486,13 @@ def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800
 			sys.stdout.flush()
 		sys.stdout.flush()
 		d=np.fromstring(line, dtype=float, sep=' ')
+		dis = x[0]
 		x=(d[:-2]-bottom)/top
 		y1=2.*(d[-2]-0.5)
 		y2=2.*(d[-1]-0.5)
 		for b in range(len(bins)-1):
-			if x[0] > bins[b] and x[0] < bins[b+1]:
-				print b, x[0]
+			if dis > bins[b] and dis < bins[b+1]:
+				print b, dis
 				xtx[b]+=np.outer(x,x)
 				xty1[b]+=int(y1)*x
 				xty2[b]+=int(y2)*x
