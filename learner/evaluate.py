@@ -3,7 +3,7 @@ import numpy as np
 import os, sys
 sys.path.insert(0, os.getcwd())
 from core.user import User
-import cPickle as pickle
+import pickle as pickle
 import random
 import math
 
