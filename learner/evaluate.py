@@ -155,8 +155,8 @@ air_gw = monte_carlo_multi(airnet, gowalla_weights, 20)
 gow_aw = monte_carlo_multi(gowalla, airnet_weights, 20)
 gow_gw = monte_carlo_multi(gowalla, gowalla_weights, 20)
 
-np.savetxt(air_aw, "evaluations/air_aw.txt")
-np.savetxt(air_gw, "evaluations/air_gw.txt")
-np.savetxt(gow_aw, "evaluations/gow_aw.txt")
-np.savetxt(gow_gw, "evaluations/gow_gw.txt")
+np.savetxt(air_aw, "evaluations/air_aw2.txt")
+np.savetxt(air_gw, "evaluations/air_gw2.txt")
+np.savetxt(gow_aw, "evaluations/gow_aw2.txt")
+np.savetxt(gow_gw, "evaluations/gow_gw2.txt")
 
