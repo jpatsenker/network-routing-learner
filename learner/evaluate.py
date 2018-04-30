@@ -114,6 +114,28 @@ def simulation(graph,weights):
 		hops += 1
 	return hops, bfs(graph,destination)[source]
 
+def simulation_random(graph):
+	graph_size=len(graph)
+
+	source = int(random.random()*graph_size)
+	destination = int(random.random()*graph_size)
+	while bfs(graph,destination)[source] == -1:
+		source = int(random.random()*graph_size)
+		destination = int(random.random()*graph_size)
+	print("ROUTING FROM ", source, "TO", destination)
+	curr = source
+	hops = 0
+	while curr != destination and hops < 100:
+		#print(hops, curr)
+		neighbors = graph[curr].friends
+		if destination in neighbors:
+			hops+=1
+			break
+		i = int(random.random()*len(neighbors))
+		curr=neighbors[i]
+		hops += 1
+	return hops, bfs(graph,destination)[source]
+
 def simulation_delegate(graph, weights, ret, pnum):
 	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	ret[pnum] = simulation(graph,weights)
