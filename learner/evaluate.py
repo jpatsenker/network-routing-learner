@@ -115,7 +115,7 @@ def simulation(graph,weights):
 	return hops, bfs(graph,destination)[source]
 
 def simulation_delegate(graph, weights, ret, pnum):
-	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
+	os.system("taskset -p -c " + str(30+pnum) + " " + str(os.getpid()))
 	ret[pnum] = simulation(graph,weights)
 
 
