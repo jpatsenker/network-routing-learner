@@ -54,7 +54,11 @@ def simulation(graph,weights):
 	curr = source
 	hops = 0
 	while curr != destination:
+		print graph
 		neighbors = graph[curr].friends
+		if destination in neighbors:
+			hops+=1
+			break
 		neighbor_totals = np.zeros(len(neighbors))
 		for i in range(len(neighbors)):
 			neighbor=neighbors[i]
