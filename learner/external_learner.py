@@ -154,7 +154,7 @@ def delegate_cross_entropy_error_from_multiple_files_bins(w1, w2, f, ret, pnum,t
 		y1=(line[-2]-0.5)*2.
 		y2=(line[-1]-0.5)*2.
 		for b in range(len(bins)-1):
-			if x[0] > bins[b] and x[1]<bins[b+1]:
+			if x[0] > bins[b] and x[0]<bins[b+1]:
 				exppart_1=np.e**(y1*np.dot(w1[b],x))
 				exppart_2=np.e**(y2*np.dot(w2[b],x))
 				part2_1 = -y1/(1.+exppart_1)
@@ -490,10 +490,11 @@ def delegateRegressFullFileBins(f,ret,pnum,top,bottom,bins=[0,50,100,200,400,800
 		y1=2.*(d[-2]-0.5)
 		y2=2.*(d[-1]-0.5)
 		for b in range(len(bins)-1):
-			if x[0] > bins[b] and x[1] < bins[b+1]:
+			if x[0] > bins[b] and x[0] < bins[b+1]:
 				xtx[b]+=np.outer(x,x)
 				xty1[b]+=int(y1)*x
 				xty2[b]+=int(y2)*x
+				continue
 		line = f.readline()
 		c+=1
 
