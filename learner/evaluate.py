@@ -140,6 +140,10 @@ def simulation_delegate(graph, weights, ret, pnum):
 	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
 	ret[pnum] = simulation(graph,weights)
 
+def simulation_delegate(graph, ret, pnum):
+	os.system("taskset -p -c " + str(pnum) + " " + str(os.getpid()))
+	ret[pnum] = simulation_random(graph)
+
 
 def monte_carlo(graph,weights,iters):
 	stretch = np.zeros(iters)
@@ -163,6 +167,21 @@ def monte_carlo_multi(graph,weights,iters):
 		stretch[i] = route/shortest
 	return stretch
 
+def monte_carlo_multi_random(graph,iters):
+	stretch = np.zeros(iters)
+	ps=[]
+	m=Manager()
+	ret = m.list([0]*iters)
+	for i in range(iters):
+		ps.append(Process(target=simulation_delegate, args=(graph,ret,i)))
+		print("<starting ", i, ">")
+		ps[-1].start()
+	for i in range(iters):
+		ps[i].join()
+		route, shortest = ret[i]
+		stretch[i] = route/shortest
+	return stretch
+
 gowalla_weights = np.array([1.468081706129472086e-01,-1.545969938352645734e+00,-5.089143668535733855e-01,4.370629297416210868e+00,-5.072072365082430423e+00,-8.362934819850959656e+00,-4.214174338656954122e-01])
 airnet_weights = np.array([-0.43524995,-2.07752073,-0.57762063,1.1298535,-1.03288428,-1.65432984,-0.14868317])
 
@@ -172,16 +191,19 @@ with open('data/airport_net/airnet.pkl','rb') as w:
 with open('GraphSets/test_graph.pkl','rb') as w:
 	gowalla = reindex_dict(pickle.load(w))
 
-air_aw = monte_carlo_multi(airnet, airnet_weights, 50)
-np.savetxt("evaluations/air_aw.txt",air_aw)
+# air_aw = monte_carlo_multi(airnet, airnet_weights, 50)
+# np.savetxt("evaluations/air_aw.txt",air_aw)
+#
+# air_gw = monte_carlo_multi(airnet, gowalla_weights, 50)
+# np.savetxt("evaluations/air_gw.txt",air_gw)
+#
+# gow_aw = monte_carlo_multi(gowalla, airnet_weights, 50)
+# np.savetxt("evaluations/gow_aw.txt",gow_aw)
+#
+# gow_gw = monte_carlo_multi(gowalla, gowalla_weights, 50)
+# np.savetxt("evaluations/gow_gw.txt",gow_gw)
 
-air_gw = monte_carlo_multi(airnet, gowalla_weights, 50)
-np.savetxt("evaluations/air_gw.txt",air_gw)
-
-gow_aw = monte_carlo_multi(gowalla, airnet_weights, 50)
-np.savetxt("evaluations/gow_aw.txt",gow_aw)
-
-gow_gw = monte_carlo_multi(gowalla, gowalla_weights, 50)
-np.savetxt("evaluations/gow_gw.txt",gow_gw)
-
-
+rand_g = monte_carlo_multi_random(gowalla,50)
+np.savetxt("evaluations/rand_g.txt",rand_g)
+rand_a = monte_carlo_multi_random(gowalla,50)
+np.savetxt("evaluations/rand_a.txt",rand_a)
